@@ -1,4 +1,4 @@
-# Phiên bản v2 / 30 – Đa ngôn ngữ (6 ngôn ngữ, ô chọn ngôn ngữ, ngôn ngữ dự phòng ko → en → vi)
+# Phiên bản v3 / 30 – Tìm kiếm không dấu & lọc theo loại di tích
 
 Dự án **Hội An Audio Guide** được tách thành 30 phiên bản: v30 là bản gốc đầy đủ, mỗi bản nhỏ hơn bỏ bớt **một** chức năng. Đi theo chiều ngược lại (v1 → v30), mỗi bản thêm đúng một chức năng.
 
@@ -6,10 +6,10 @@ Dự án **Hội An Audio Guide** được tách thành 30 phiên bản: v30 là
 
 - v1 – Bản tối giản: danh sách 15 di tích, trang chi tiết, nghe thuyết minh (giọng đọc tự động / MP3), chỉ tiếng Việt
 - v2 – Đa ngôn ngữ (6 ngôn ngữ, ô chọn ngôn ngữ, ngôn ngữ dự phòng ko → en → vi)
+- v3 – Tìm kiếm không dấu & lọc theo loại di tích
 
 ## Chưa có ở bản này (thêm ở các bản sau)
 
-- v3 – Tìm kiếm không dấu & lọc theo loại di tích
 - v4 – Bản đồ di tích (Leaflet, ảnh nền tự đổi nguồn)
 - v5 – Định vị GPS của người dùng (chấm vị trí, di tích gần nhất, sắp xếp “Gần tôi”)
 - v6 – Thuyết minh tự động khi đến gần (bộ máy geofence “rảnh tay”)
@@ -38,23 +38,21 @@ Dự án **Hội An Audio Guide** được tách thành 30 phiên bản: v30 là
 - v29 – Test E2E trình duyệt (Playwright)
 - v30 – CI/CD GitHub Actions – BẢN ĐẦY ĐỦ (gốc)
 
-## Thay đổi so với v1
+## Thay đổi so với v2
 
-v2 = v1 + **Đa ngôn ngữ (6 ngôn ngữ, ô chọn ngôn ngữ, ngôn ngữ dự phòng ko → en → vi)**.
+v3 = v2 + **Tìm kiếm không dấu & lọc theo loại di tích**.
 
-Cách làm: bắt đầu từ v2, gỡ chức năng này ra để được v1. Những chỗ đã sửa khi gỡ (tức là phần v2 có thêm so với v1):
+Cách làm: bắt đầu từ v3, gỡ chức năng này ra để được v2. Những chỗ đã sửa khi gỡ (tức là phần v3 có thêm so với v2):
 
-- Web: xóa `components/LangSelect.tsx` (ô chọn ngôn ngữ) và 5 bộ chữ giao diện `i18n/locales/{en,fr,ko,zh,ja}.ts`; `i18n/index.ts` chỉ nạp `vi` (bỏ `SUPPORTED`, `LANG_NAMES`, đoán ngôn ngữ thiết bị, `?lang=`, lưu lựa chọn).
-- `api/hooks.ts`: `useLocations/useLocation/useNarration` không còn tham số `lang`; bỏ `useLanguages`, `fetchNarration`. `api/types.ts`: bỏ `isFallback`, `requestedLanguage`, kiểu `Language`.
-- `pages/Detail.tsx`: bỏ thông báo “Bản dịch … chưa có – đang hiển thị …”; `TourBar.tsx`: bỏ nhãn mã ngôn ngữ; `TourContext.tsx`, `Home.tsx`, `Places.tsx`: không truyền ngôn ngữ.
-- Content Service: xóa `fallback.ts` + `fallback.test.ts` (chuỗi dự phòng ko → en → vi); bỏ `GET /languages` và tham số `lang`; luôn lấy bài của ngôn ngữ mặc định (`Languages.is_default = 1`). Location Service: bỏ tham số `lang`.
-- Gateway: bỏ route `/api/v1/languages`.
-- Dữ liệu: xóa `db/seed/data/{en,fr,ko,zh,ja}.json`; `locations.json` chỉ còn ngôn ngữ `vi`; `generate-seed.mjs` chỉ sinh bài tiếng Việt. Bảng `Languages` vẫn giữ (khóa ngoại của `Narrations`) nhưng chỉ có 1 dòng.
-- `vi.ts`: bỏ `detail.fallback`, `lang.label`. Integration test: TC01 và test thuyết minh chuyển sang tiếng Việt, bỏ TC29 (dự phòng).
+- `pages/Places.tsx` viết lại: chỉ còn danh sách toàn bộ di tích (bỏ ô tìm kiếm có debounce 300 ms, hàng chip lọc theo loại, tham số `?q=`/`?category=` trên URL). Xóa `components/ScrollRow.tsx` (hàng cuộn kéo bằng chuột).
+- `pages/Home.tsx`: bỏ ô tìm kiếm trên ảnh hero. `api/hooks.ts`: `useLocations` không nhận `q`/`category`; bỏ `useCategories`.
+- `services/location/src/app.ts`: `GET /locations` bỏ tham số `q`, `category` (tìm không dấu theo tên + theo tiêu đề bản dịch); bỏ `GET /categories`, `escapeLike`. `services/content/src/app.ts`: bỏ API nội bộ `/internal/narrations/search`.
+- Gateway: bỏ route `/api/v1/categories`. 6 file ngôn ngữ: bỏ `search.placeholder`, `filter.all`, `list.empty`, `home.search`. `styles.css`: bỏ 21 dòng CSS ô tìm kiếm/chip.
+- Integration test: bỏ TC05, TC05b, TC06, TC07.
 
 ## Đã kiểm tra
 
-- typecheck, lint, build đạt; 24 test pass (unit + integration với SQL Server).
+- typecheck, lint, build đạt; 29 test pass (unit + integration với SQL Server).
 - Integration test chạy 2–4 service + Gateway trong cùng tiến trình với SQL Server 2022 thật, CSDL tạo mới từ migration + seed của chính bản này.
 
 ## Cách chạy

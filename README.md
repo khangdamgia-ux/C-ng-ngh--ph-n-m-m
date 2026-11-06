@@ -26,11 +26,11 @@ Trình duyệt (React)     ──HTTPS /api/v1──► API Gateway :8080
 |---|---|---|---|
 | Frontend | `apps/web` | Giao diện khách, trình phát thuyết minh | – |
 | API Gateway | `services/gateway` | Điểm vào duy nhất, bảng định tuyến (PRD 8.3.2), rate limit, trả 503 khi service lỗi | – |
-| Location Service | `services/location` | Địa điểm, tọa độ | Locations, LocationCategories |
+| Location Service | `services/location` | Địa điểm, tìm kiếm/lọc, tọa độ | Locations, LocationCategories |
 | Content Service | `services/content` | Thuyết minh, ngôn ngữ dự phòng, âm thanh | Languages, Narrations |
 | Shared | `packages/shared` | Lỗi chuẩn, middleware, gọi service nội bộ (timeout + retry), kết nối DB | – |
 
-**Giao tiếp giữa các service** (FR-20): Content → Location (kiểm tra địa điểm), Location → Content (tiêu đề theo ngôn ngữ). Mọi lời gọi nội bộ có `X-Internal-Key`, `X-Request-Id`, timeout 2 s, retry GET 1 lần; service phụ lỗi thì hệ thống **suy giảm có kiểm soát** (vd. danh sách vẫn hiện khi Content lỗi).
+**Giao tiếp giữa các service** (FR-20): Content → Location (kiểm tra địa điểm), Location → Content (tiêu đề theo ngôn ngữ, tìm kiếm). Mọi lời gọi nội bộ có `X-Internal-Key`, `X-Request-Id`, timeout 2 s, retry GET 1 lần; service phụ lỗi thì hệ thống **suy giảm có kiểm soát** (vd. danh sách vẫn hiện khi Content lỗi).
 
 ## 2. Cấu trúc thư mục
 
@@ -87,7 +87,7 @@ npm run dev              # chạy 3 service + Gateway + Vite → http://localhos
 |---|---|
 | FR-02/03 Ngôn ngữ + dự phòng ko → en → vi | `i18n/`, `content/src/fallback.ts` |
 | FR-04 Trình phát (phát/tạm dừng) | `tour/narrator.ts`, `components/Player.tsx` |
-| FR-06, FR-10 Danh sách, chi tiết | `location/app.ts`, `pages/Places.tsx`, `pages/Detail.tsx` |
+| FR-06–10 Danh sách, tìm kiếm không dấu, lọc, chi tiết | `location/app.ts`, `pages/Places.tsx`, `pages/Detail.tsx` |
 | FR-11 Chỉ đường | link Google Maps đi bộ (`pages/Detail.tsx`) |
 | FR-20 Giao tiếp service | `shared/src/client.ts`, `gateway/src/routes.ts`, `gateway/src/app.ts` |
 | NFR-04 Bảo mật | helmet, CORS, rate limit, Zod, truy vấn tham số hóa, chặn header nội bộ giả mạo |
