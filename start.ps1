@@ -32,9 +32,6 @@ if ($firstRun) {
     if ($LASTEXITCODE -ne 0) { Fail 'docker compose create loi.' }
     docker run --rm -v "${P}_mssql-data:/v" -v "${rootFwd}/backup:/b" alpine tar xzf /b/mssql-data.tgz -C /v
     if ($LASTEXITCODE -ne 0) { Fail 'Khoi phuc database loi.' }
-    if (Test-Path backup\media.tgz) {
-      docker run --rm -v "${P}_media:/v" -v "${rootFwd}/backup:/b" alpine tar xzf /b/media.tgz -C /v
-    }
     $restored = $true
   } else {
     Write-Host 'Khong co backup\mssql-data.tgz: se tao du lieu mau moi.' -ForegroundColor Yellow
@@ -76,7 +73,6 @@ try {
   if (Test-Path qr-trang-chu.png) { Start-Process (Resolve-Path qr-trang-chu.png) }
 
   Write-Host "`nDANG CHAY. Link: $url" -ForegroundColor Green
-  Write-Host "Admin: $url/admin"
   Write-Host 'Giu cua so nay mo. Nhan Ctrl+C hoac dong cua so de dung tunnel.' -ForegroundColor Yellow
   Wait-Process -Id $tun.Id
 } finally {
