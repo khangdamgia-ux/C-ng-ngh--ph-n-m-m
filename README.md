@@ -18,6 +18,7 @@ Giải nén → bấm đúp **`CHAY-TAT-CA.bat`**. File này tự: mở Docker D
 Trình duyệt (React)     ──HTTPS /api/v1──► API Gateway :8080
    │                                          (định tuyến,          Location :4002 ◄─┐ REST nội bộ
    │                                          rate limit, 503)      Content :4003 ──┘ X-Internal-Key
+   └─► OpenStreetMap
                                                                         │
                                                          SQL Server 2022
 ```
@@ -88,7 +89,7 @@ npm run dev              # chạy 3 service + Gateway + Vite → http://localhos
 | FR-02/03 Ngôn ngữ + dự phòng ko → en → vi | `i18n/`, `content/src/fallback.ts` |
 | FR-04 Trình phát (phát/tạm dừng) | `tour/narrator.ts`, `components/Player.tsx` |
 | FR-06–10 Danh sách, tìm kiếm không dấu, lọc, chi tiết | `location/app.ts`, `pages/Places.tsx`, `pages/Detail.tsx` |
-| FR-11 Chỉ đường | link Google Maps đi bộ (`pages/Detail.tsx`) |
+| FR-11 Bản đồ + chỉ đường | `components/MapView.tsx` (Leaflet/OSM), link Google Maps đi bộ |
 | FR-20 Giao tiếp service | `shared/src/client.ts`, `gateway/src/routes.ts`, `gateway/src/app.ts` |
 | NFR-04 Bảo mật | helmet, CORS, rate limit, Zod, truy vấn tham số hóa, chặn header nội bộ giả mạo |
 | NFR-09 Quyền riêng tư | không thu thập vị trí; không lưu IP |
@@ -99,6 +100,8 @@ npm run dev              # chạy 3 service + Gateway + Vite → http://localhos
 - **Âm thanh:** dữ liệu mẫu chưa có file MP3, nên website dùng **giọng đọc tự động của thiết bị** (Web Speech API). Chất lượng và việc có giọng cho từng ngôn ngữ phụ thuộc thiết bị và trình duyệt: Android và iOS thường có đủ, Windows có thể thiếu giọng tiếng Việt. Bài nào có `audio_url` (đường dẫn http/https tới file MP3) thì website phát file đó.
 - **Tọa độ 15 di tích là tham khảo**, cần đo lại tại thực địa. **Giá vé** để trống (cột `ticket_price` trong CSDL). Nội dung lịch sử cần đối chiếu nguồn chính thống (xem PRD Phụ lục C).
 - `npm audit` báo lỗ hổng của `braces`/`micromatch` (phụ thuộc của `http-proxy-middleware`). Lỗ hổng chỉ khai thác được khi glob do người dùng nhập, mà Gateway định tuyến bằng hàm, không dùng glob.
+- **Bản đồ không còn nền xám:** mỗi ô ảnh nền tự thử lần lượt nhiều nguồn độc lập (server của mình → OSM → Esri → OSM-FR; không dùng CARTO vì nó đóng dấu "API KEY REQUIRED"), có timeout, tự thử lại khi mạng chập chờn/có mạng lại/quay lại tab, và từ chối ô "bị chặn". Nếu tất cả nguồn đều không tới được, nền là giấy be + lưới, kèm thông báo và nút "Thử lại"; các điểm tham quan vẫn dùng bình thường (`apps/web/src/components/resilientTiles.ts`).
+- Khi triển khai lượng truy cập lớn nên dùng nhà cung cấp tile riêng theo chính sách sử dụng của OSM.
 
 ---
 

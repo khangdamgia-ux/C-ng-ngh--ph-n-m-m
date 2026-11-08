@@ -1,4 +1,4 @@
-# Phiên bản v3 / 30 – Tìm kiếm không dấu & lọc theo loại di tích
+# Phiên bản v4 / 30 – Bản đồ di tích (Leaflet, ảnh nền tự đổi nguồn)
 
 Dự án **Hội An Audio Guide** được tách thành 30 phiên bản: v30 là bản gốc đầy đủ, mỗi bản nhỏ hơn bỏ bớt **một** chức năng. Đi theo chiều ngược lại (v1 → v30), mỗi bản thêm đúng một chức năng.
 
@@ -7,10 +7,10 @@ Dự án **Hội An Audio Guide** được tách thành 30 phiên bản: v30 là
 - v1 – Bản tối giản: danh sách 15 di tích, trang chi tiết, nghe thuyết minh (giọng đọc tự động / MP3), chỉ tiếng Việt
 - v2 – Đa ngôn ngữ (6 ngôn ngữ, ô chọn ngôn ngữ, ngôn ngữ dự phòng ko → en → vi)
 - v3 – Tìm kiếm không dấu & lọc theo loại di tích
+- v4 – Bản đồ di tích (Leaflet, ảnh nền tự đổi nguồn)
 
 ## Chưa có ở bản này (thêm ở các bản sau)
 
-- v4 – Bản đồ di tích (Leaflet, ảnh nền tự đổi nguồn)
 - v5 – Định vị GPS của người dùng (chấm vị trí, di tích gần nhất, sắp xếp “Gần tôi”)
 - v6 – Thuyết minh tự động khi đến gần (bộ máy geofence “rảnh tay”)
 - v7 – Trình phát đầy đủ (tua ±10 giây, tốc độ đọc, nghe lại, Media Session)
@@ -38,17 +38,17 @@ Dự án **Hội An Audio Guide** được tách thành 30 phiên bản: v30 là
 - v29 – Test E2E trình duyệt (Playwright)
 - v30 – CI/CD GitHub Actions – BẢN ĐẦY ĐỦ (gốc)
 
-## Thay đổi so với v2
+## Thay đổi so với v3
 
-v3 = v2 + **Tìm kiếm không dấu & lọc theo loại di tích**.
+v4 = v3 + **Bản đồ di tích (Leaflet, ảnh nền tự đổi nguồn)**.
 
-Cách làm: bắt đầu từ v3, gỡ chức năng này ra để được v2. Những chỗ đã sửa khi gỡ (tức là phần v3 có thêm so với v2):
+Cách làm: bắt đầu từ v4, gỡ chức năng này ra để được v3. Những chỗ đã sửa khi gỡ (tức là phần v4 có thêm so với v3):
 
-- `pages/Places.tsx` viết lại: chỉ còn danh sách toàn bộ di tích (bỏ ô tìm kiếm có debounce 300 ms, hàng chip lọc theo loại, tham số `?q=`/`?category=` trên URL). Xóa `components/ScrollRow.tsx` (hàng cuộn kéo bằng chuột).
-- `pages/Home.tsx`: bỏ ô tìm kiếm trên ảnh hero. `api/hooks.ts`: `useLocations` không nhận `q`/`category`; bỏ `useCategories`.
-- `services/location/src/app.ts`: `GET /locations` bỏ tham số `q`, `category` (tìm không dấu theo tên + theo tiêu đề bản dịch); bỏ `GET /categories`, `escapeLike`. `services/content/src/app.ts`: bỏ API nội bộ `/internal/narrations/search`.
-- Gateway: bỏ route `/api/v1/categories`. 6 file ngôn ngữ: bỏ `search.placeholder`, `filter.all`, `list.empty`, `home.search`. `styles.css`: bỏ 21 dòng CSS ô tìm kiếm/chip.
-- Integration test: bỏ TC05, TC05b, TC06, TC07.
+- Xóa `components/MapView.tsx`, `components/resilientTiles.ts` (lớp ảnh nền tự đổi nguồn OSM → Esri → OSM-FR, tự thử lại), `pages/MapPage.tsx`, `tour/routes.ts` (tâm Phố cổ), `tour/geo.ts`.
+- `App.tsx`: bỏ route `/map`; `Layout.tsx`: bỏ mục “Bản đồ”; `pages/Detail.tsx`: bỏ bản đồ nhỏ cuối trang (giữ nút “Chỉ đường” mở Google Maps).
+- `apps/web/package.json`: bỏ `leaflet`, `react-leaflet`, `@types/leaflet`.
+- `docker/nginx.conf`: bỏ cache + proxy ảnh bản đồ `/maptiles` (3 nguồn dự phòng); `vite.config.ts`: bỏ proxy `/maptiles`; `docker-compose.yml`: bỏ `dns` riêng cho container web.
+- 6 file ngôn ngữ: bỏ `nav.map`, `detail.map`. `styles.css`: bỏ CSS bản đồ. README: bỏ ghi chú về ảnh nền bản đồ.
 
 ## Đã kiểm tra
 

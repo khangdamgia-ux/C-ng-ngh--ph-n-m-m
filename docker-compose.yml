@@ -57,6 +57,7 @@ services:
     ports: ["8080:8080"]
 
   web:
+    dns: [8.8.8.8, 1.1.1.1]   # không phụ thuộc DNS của máy chủ khi tải ảnh bản đồ
     image: ${IMAGE_PREFIX:-hoian}/web:${IMAGE_TAG:-latest}
     build: { context: ., dockerfile: docker/web.Dockerfile }
     depends_on:
