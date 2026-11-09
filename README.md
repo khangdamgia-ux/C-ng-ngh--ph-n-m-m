@@ -99,7 +99,7 @@ Trên điện thoại thật: website cần chạy qua **HTTPS** (Geolocation AP
 | Yêu cầu | Nơi hiện thực |
 |---|---|
 | FR-02/03 Ngôn ngữ + dự phòng ko → en → vi | `i18n/`, `content/src/fallback.ts` |
-| FR-04 Trình phát (phát/tạm dừng) | `tour/narrator.ts`, `components/Player.tsx` |
+| FR-04 Trình phát (tua, tốc độ, Media Session) | `tour/narrator.ts`, `components/Player.tsx` |
 | **FR-05 Rảnh tay (cốt lõi)** | `tour/engine.ts`, `tour/TourContext.tsx`, `components/StartTourButton.tsx`, `TourBar.tsx` |
 | FR-06–10 Danh sách, tìm kiếm không dấu, lọc, gần tôi, chi tiết | `location/app.ts`, `pages/Places.tsx`, `pages/Detail.tsx` |
 | FR-11 Bản đồ + chỉ đường | `components/MapView.tsx` (Leaflet/OSM), link Google Maps đi bộ |
