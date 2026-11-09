@@ -1,4 +1,4 @@
-# Phiên bản v4 / 30 – Bản đồ di tích (Leaflet, ảnh nền tự đổi nguồn)
+# Phiên bản v6 / 30 – Thuyết minh tự động khi đến gần (bộ máy geofence “rảnh tay”)
 
 Dự án **Hội An Audio Guide** được tách thành 30 phiên bản: v30 là bản gốc đầy đủ, mỗi bản nhỏ hơn bỏ bớt **một** chức năng. Đi theo chiều ngược lại (v1 → v30), mỗi bản thêm đúng một chức năng.
 
@@ -8,11 +8,11 @@ Dự án **Hội An Audio Guide** được tách thành 30 phiên bản: v30 là
 - v2 – Đa ngôn ngữ (6 ngôn ngữ, ô chọn ngôn ngữ, ngôn ngữ dự phòng ko → en → vi)
 - v3 – Tìm kiếm không dấu & lọc theo loại di tích
 - v4 – Bản đồ di tích (Leaflet, ảnh nền tự đổi nguồn)
+- v5 – Định vị GPS của người dùng (chấm vị trí, di tích gần nhất, sắp xếp “Gần tôi”)
+- v6 – Thuyết minh tự động khi đến gần (bộ máy geofence “rảnh tay”)
 
 ## Chưa có ở bản này (thêm ở các bản sau)
 
-- v5 – Định vị GPS của người dùng (chấm vị trí, di tích gần nhất, sắp xếp “Gần tôi”)
-- v6 – Thuyết minh tự động khi đến gần (bộ máy geofence “rảnh tay”)
 - v7 – Trình phát đầy đủ (tua ±10 giây, tốc độ đọc, nghe lại, Media Session)
 - v8 – Trang chủ đầy đủ (khối chủ đề, đèn lồng, hướng dẫn 3 bước)
 - v9 – Yêu thích
@@ -38,21 +38,22 @@ Dự án **Hội An Audio Guide** được tách thành 30 phiên bản: v30 là
 - v29 – Test E2E trình duyệt (Playwright)
 - v30 – CI/CD GitHub Actions – BẢN ĐẦY ĐỦ (gốc)
 
-## Thay đổi so với v3
+## Thay đổi so với v5
 
-v4 = v3 + **Bản đồ di tích (Leaflet, ảnh nền tự đổi nguồn)**.
+v6 = v5 + **Thuyết minh tự động khi đến gần (bộ máy geofence “rảnh tay”)**.
 
-Cách làm: bắt đầu từ v4, gỡ chức năng này ra để được v3. Những chỗ đã sửa khi gỡ (tức là phần v4 có thêm so với v3):
+Cách làm: bắt đầu từ v6, gỡ chức năng này ra để được v5. Những chỗ đã sửa khi gỡ (tức là phần v6 có thêm so với v5):
 
-- Xóa `components/MapView.tsx`, `components/resilientTiles.ts` (lớp ảnh nền tự đổi nguồn OSM → Esri → OSM-FR, tự thử lại), `pages/MapPage.tsx`, `tour/routes.ts` (tâm Phố cổ), `tour/geo.ts`.
-- `App.tsx`: bỏ route `/map`; `Layout.tsx`: bỏ mục “Bản đồ”; `pages/Detail.tsx`: bỏ bản đồ nhỏ cuối trang (giữ nút “Chỉ đường” mở Google Maps).
-- `apps/web/package.json`: bỏ `leaflet`, `react-leaflet`, `@types/leaflet`.
-- `docker/nginx.conf`: bỏ cache + proxy ảnh bản đồ `/maptiles` (3 nguồn dự phòng); `vite.config.ts`: bỏ proxy `/maptiles`; `docker-compose.yml`: bỏ `dns` riêng cho container web.
-- 6 file ngôn ngữ: bỏ `nav.map`, `detail.map`. `styles.css`: bỏ CSS bản đồ. README: bỏ ghi chú về ảnh nền bản đồ.
+- Xóa `apps/web/src/tour/engine.ts` (bộ máy rảnh tay: đứng trong vùng ≥ 3 s, cooldown 30 phút, lọc GPS > 30 m, hysteresis, ưu tiên vùng chồng lấn) và `engine.test.ts` (8 test).
+- `tour/TourContext.tsx` viết lại gọn: chỉ còn định vị GPS + trình phát dùng chung. Bỏ công tắc tự thuyết minh (`autoNarrate`, `hoian.autoNarrate`), cooldown (`hoian.cooldowns`), nhịp kiểm tra mỗi giây, `playPlace`, `toPlace`, cờ `auto` của bài đang phát. Báo GPS yếu dùng ngưỡng cố định 30 m.
+- `tour/providers.ts`: kiểu `GpsFix` tự định nghĩa (không còn phụ thuộc `engine.ts`).
+- `components/GpsCard.tsx`: bỏ công tắc “Tự thuyết minh…” và dòng “GPS yếu – chưa kích hoạt thuyết minh”. `TourBar`/`LocationCard`: nhãn “Đang tự động thuyết minh” đổi thành “Thuyết minh”.
+- 6 file ngôn ngữ: bỏ `gps.auto`, `tour.weakGps`, `tour.nowPlaying`; viết lại `gps.enableHint` và `home.lead` (không còn hứa tự phát khi đến gần).
+- README: bỏ phần thuyết minh rảnh tay.
 
 ## Đã kiểm tra
 
-- typecheck, lint, build đạt; 29 test pass (unit + integration với SQL Server).
+- typecheck, lint, build đạt; 41 test pass (unit + integration với SQL Server).
 - Integration test chạy 2–4 service + Gateway trong cùng tiến trình với SQL Server 2022 thật, CSDL tạo mới từ migration + seed của chính bản này.
 
 ## Cách chạy
