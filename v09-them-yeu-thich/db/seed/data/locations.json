@@ -1,0 +1,35 @@
+{
+  "categories": [
+    { "code": "DINH_CHUA_MIEU", "name": "Đình – Chùa – Miếu", "sortOrder": 1 },
+    { "code": "HOI_QUAN", "name": "Hội quán", "sortOrder": 2 },
+    { "code": "NHA_CO", "name": "Nhà cổ", "sortOrder": 3 },
+    { "code": "BAO_TANG", "name": "Bảo tàng", "sortOrder": 4 },
+    { "code": "CHO_PHO_DEM", "name": "Chợ & phố đêm", "sortOrder": 5 }
+  ],
+  "languages": [
+    { "code": "vi", "name": "Tiếng Việt", "isDefault": true, "fallbackOrder": 2 },
+    { "code": "en", "name": "English", "isDefault": false, "fallbackOrder": 1 },
+    { "code": "ko", "name": "한국어", "isDefault": false, "fallbackOrder": null },
+    { "code": "zh", "name": "中文", "isDefault": false, "fallbackOrder": null },
+    { "code": "ja", "name": "日本語", "isDefault": false, "fallbackOrder": null },
+    { "code": "fr", "name": "Français", "isDefault": false, "fallbackOrder": null }
+  ],
+  "_note": "Tọa độ là tọa độ THAM KHẢO (PRD Phụ lục A) – cần đo lại tại thực địa trước khi vận hành.",
+  "locations": [
+    { "code": "chua-cau", "name": "Chùa Cầu (Lai Viễn Kiều)", "category": "DINH_CHUA_MIEU", "address": "Đầu đường Trần Phú", "lat": 15.877090, "lng": 108.326020, "radius": 25, "priority": 10, "openingHours": "07:00 – 21:30 (tham khảo)" },
+    { "code": "nha-co-phung-hung", "name": "Nhà cổ Phùng Hưng", "category": "NHA_CO", "address": "4 Nguyễn Thị Minh Khai", "lat": 15.877170, "lng": 108.325550, "radius": 20, "priority": 0, "openingHours": "08:00 – 18:00 (tham khảo)" },
+    { "code": "hoi-quan-quang-dong", "name": "Hội quán Quảng Đông", "category": "HOI_QUAN", "address": "176 Trần Phú", "lat": 15.877270, "lng": 108.327000, "radius": 20, "priority": 0, "openingHours": "07:00 – 18:00 (tham khảo)" },
+    { "code": "bao-tang-sa-huynh", "name": "Bảo tàng Văn hóa Sa Huỳnh", "category": "BAO_TANG", "address": "149 Trần Phú", "lat": 15.877140, "lng": 108.326800, "radius": 20, "priority": 0, "openingHours": "07:00 – 17:00 (tham khảo)" },
+    { "code": "nha-co-tan-ky", "name": "Nhà cổ Tấn Ký", "category": "NHA_CO", "address": "101 Nguyễn Thái Học", "lat": 15.876680, "lng": 108.328260, "radius": 20, "priority": 5, "openingHours": "08:00 – 18:00 (tham khảo)" },
+    { "code": "nha-co-quan-thang", "name": "Nhà cổ Quân Thắng", "category": "NHA_CO", "address": "77 Trần Phú", "lat": 15.877250, "lng": 108.328600, "radius": 20, "priority": 0, "openingHours": "07:00 – 18:00 (tham khảo)" },
+    { "code": "bao-tang-gom-su", "name": "Bảo tàng Gốm sứ Mậu dịch", "category": "BAO_TANG", "address": "80 Trần Phú", "lat": 15.877350, "lng": 108.328800, "radius": 20, "priority": 1, "openingHours": "07:00 – 17:00 (tham khảo)" },
+    { "code": "nha-tho-toc-tran", "name": "Nhà thờ tộc Trần", "category": "NHA_CO", "address": "21 Lê Lợi", "lat": 15.878500, "lng": 108.328000, "radius": 20, "priority": 0, "openingHours": "07:30 – 18:00 (tham khảo)" },
+    { "code": "hoi-quan-phuc-kien", "name": "Hội quán Phúc Kiến", "category": "HOI_QUAN", "address": "46 Trần Phú", "lat": 15.877470, "lng": 108.329580, "radius": 25, "priority": 5, "openingHours": "07:00 – 18:00 (tham khảo)" },
+    { "code": "quan-cong-mieu", "name": "Quan Công Miếu", "category": "DINH_CHUA_MIEU", "address": "24 Trần Phú", "lat": 15.877600, "lng": 108.330200, "radius": 25, "priority": 0, "openingHours": "07:00 – 18:00 (tham khảo)" },
+    { "code": "cho-hoi-an", "name": "Chợ Hội An", "category": "CHO_PHO_DEM", "address": "Trần Phú – Bạch Đằng", "lat": 15.876600, "lng": 108.330600, "radius": 40, "priority": 0, "openingHours": "05:00 – 19:00 (tham khảo)" },
+    { "code": "hoi-quan-hai-nam", "name": "Hội quán Hải Nam", "category": "HOI_QUAN", "address": "10 Trần Phú", "lat": 15.878000, "lng": 108.331400, "radius": 20, "priority": 0, "openingHours": "07:00 – 18:00 (tham khảo)" },
+    { "code": "hoi-quan-trieu-chau", "name": "Hội quán Triều Châu", "category": "HOI_QUAN", "address": "362 Nguyễn Duy Hiệu", "lat": 15.878300, "lng": 108.333900, "radius": 25, "priority": 0, "openingHours": "07:00 – 18:00 (tham khảo)" },
+    { "code": "bao-tang-hoi-an", "name": "Bảo tàng Hội An", "category": "BAO_TANG", "address": "10B Trần Hưng Đạo", "lat": 15.879600, "lng": 108.330600, "radius": 25, "priority": 0, "openingHours": "07:00 – 17:00 (tham khảo)" },
+    { "code": "cho-dem-an-hoi", "name": "Chợ đêm An Hội (phố đèn lồng)", "category": "CHO_PHO_DEM", "address": "Nguyễn Hoàng, An Hội", "lat": 15.875600, "lng": 108.326200, "radius": 40, "priority": 0, "openingHours": "17:00 – 22:00 (tham khảo)" }
+  ]
+}
