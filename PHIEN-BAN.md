@@ -1,4 +1,4 @@
-# Phiên bản v8 / 30 – Trang chủ đầy đủ (khối chủ đề, đèn lồng, hướng dẫn 3 bước)
+# Phiên bản v10 / 30 – Lịch sử tham quan
 
 Dự án **Hội An Audio Guide** được tách thành 30 phiên bản: v30 là bản gốc đầy đủ, mỗi bản nhỏ hơn bỏ bớt **một** chức năng. Đi theo chiều ngược lại (v1 → v30), mỗi bản thêm đúng một chức năng.
 
@@ -12,11 +12,11 @@ Dự án **Hội An Audio Guide** được tách thành 30 phiên bản: v30 là
 - v6 – Thuyết minh tự động khi đến gần (bộ máy geofence “rảnh tay”)
 - v7 – Trình phát đầy đủ (tua ±10 giây, tốc độ đọc, nghe lại, Media Session)
 - v8 – Trang chủ đầy đủ (khối chủ đề, đèn lồng, hướng dẫn 3 bước)
+- v9 – Yêu thích
+- v10 – Lịch sử tham quan
 
 ## Chưa có ở bản này (thêm ở các bản sau)
 
-- v9 – Yêu thích
-- v10 – Lịch sử tham quan
 - v11 – Hàng đợi bài kế tiếp khi đang nghe
 - v12 – Tùy chọn phạm vi “điểm ở gần” 50/100/200 m
 - v13 – Tự chuyển ngôn ngữ cho bài đang nghe
@@ -38,15 +38,16 @@ Dự án **Hội An Audio Guide** được tách thành 30 phiên bản: v30 là
 - v29 – Test E2E trình duyệt (Playwright)
 - v30 – CI/CD GitHub Actions – BẢN ĐẦY ĐỦ (gốc)
 
-## Thay đổi so với v7
+## Thay đổi so với v9
 
-v8 = v7 + **Trang chủ đầy đủ (khối chủ đề, đèn lồng, hướng dẫn 3 bước)**.
+v10 = v9 + **Lịch sử tham quan**.
 
-Cách làm: bắt đầu từ v8, gỡ chức năng này ra để được v7. Những chỗ đã sửa khi gỡ (tức là phần v8 có thêm so với v7):
+Cách làm: bắt đầu từ v10, gỡ chức năng này ra để được v9. Những chỗ đã sửa khi gỡ (tức là phần v10 có thêm so với v9):
 
-- `pages/Home.tsx`: bỏ dây đèn lồng SVG động trên ảnh hero (`LanternString`), khối “Khám phá theo chủ đề” (đếm số địa điểm theo loại) và khối “Nghe thuyết minh trong 3 bước”. Trang chủ còn: ảnh hero + ô tìm kiếm + 6 di tích (gần bạn nhất nếu có GPS).
-- 6 file ngôn ngữ: bỏ `home.themes`, `home.howTitle`, `home.how1t…how3d`.
-- `styles.css`: bỏ CSS của các khối trên (script tự dò).
+- Xóa `apps/web/src/pages/History.tsx`; `App.tsx`: bỏ route `/history`; `Layout.tsx`: bỏ mục “Lịch sử” trên thanh điều hướng (trên + dưới).
+- `storage.ts`: bỏ `history` (danh sách 50 bài đã nghe trong localStorage) và kiểu `HistoryEntry`.
+- `tour/TourContext.tsx`: không ghi lịch sử khi phát bài (tự động hoặc thủ công).
+- 6 file ngôn ngữ: bỏ `nav.history`, `history.title`, `history.empty`, `history.clear` (giữ `history.note` vì trang Yêu thích còn dùng).
 
 ## Đã kiểm tra
 

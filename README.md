@@ -103,6 +103,7 @@ Trên điện thoại thật: website cần chạy qua **HTTPS** (Geolocation AP
 | **FR-05 Rảnh tay (cốt lõi)** | `tour/engine.ts`, `tour/TourContext.tsx`, `components/StartTourButton.tsx`, `TourBar.tsx` |
 | FR-06–10 Danh sách, tìm kiếm không dấu, lọc, gần tôi, chi tiết | `location/app.ts`, `pages/Places.tsx`, `pages/Detail.tsx` |
 | FR-11 Bản đồ + chỉ đường | `components/MapView.tsx` (Leaflet/OSM), link Google Maps đi bộ |
+| FR-12 Yêu thích, lịch sử | `storage.ts`, `pages/Favorites.tsx`, `pages/History.tsx` |
 | FR-20 Giao tiếp service | `shared/src/client.ts`, `gateway/src/routes.ts`, `gateway/src/app.ts` |
 | Định vị GPS của người dùng | `tour/providers.ts` (`BrowserGpsProvider`), `components/GpsCard.tsx`, `components/MapView.tsx` |
 | NFR-04 Bảo mật | helmet, CORS, rate limit, Zod, truy vấn tham số hóa, chặn header nội bộ giả mạo |
