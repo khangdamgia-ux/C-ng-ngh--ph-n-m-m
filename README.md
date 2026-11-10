@@ -37,7 +37,7 @@ Trình duyệt (React)     ──HTTPS /api/v1──► API Gateway :8080
 
 ```
 apps/web/src/
-  tour/engine.ts        ← lõi thuyết minh rảnh tay (dwell 3 s, cooldown 30 phút, GPS ≤ 30 m, ưu tiên)
+  tour/engine.ts        ← lõi thuyết minh rảnh tay (dwell 3 s, cooldown 30 phút, GPS ≤ 30 m, hàng đợi, ưu tiên)
   tour/providers.ts     ← nguồn vị trí: GPS thật của thiết bị (Geolocation API)
   tour/narrator.ts      ← trình phát: file MP3 hoặc giọng đọc tự động của thiết bị (Web Speech API)
   tour/TourContext.tsx  ← ghép mọi thứ: 1 chạm → mở khóa âm thanh + định vị
@@ -78,7 +78,7 @@ npm run dev              # chạy 3 service + Gateway + Vite → http://localhos
 
 1. Bấm nút **GPS** trên thanh trên cùng, hoặc nút ◎ ở góc bản đồ. Trình duyệt hỏi quyền vị trí → cho phép.
 2. Chấm xanh hiện vị trí thật của bạn trên bản đồ (kèm vòng sai số); khối định vị cho biết **sai số** và **di tích gần nhất**.
-3. Bật công tắc **“Tự thuyết minh khi đến gần”** (mặc định bật): vào vùng di tích ≥ 3 giây → tự phát; đang nghe thì không ngắt bài, nghe xong mới xét điểm tiếp theo.
+3. Bật công tắc **“Tự thuyết minh khi đến gần”** (mặc định bật): vào vùng di tích ≥ 3 giây → tự phát; đang nghe mà đi qua di tích khác → xếp hàng.
 
 Trên laptop không có GPS, trình duyệt ước lượng vị trí theo Wi-Fi/IP (sai số lớn). Khi phát triển có thể giả lập vị trí bằng Chrome DevTools → *More tools* → **Sensors** → *Location*.
 

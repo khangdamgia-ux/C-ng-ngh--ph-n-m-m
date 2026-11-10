@@ -1,4 +1,4 @@
-# Phiên bản v10 / 30 – Lịch sử tham quan
+# Phiên bản v12 / 30 – Tùy chọn phạm vi “điểm ở gần” 50/100/200 m
 
 Dự án **Hội An Audio Guide** được tách thành 30 phiên bản: v30 là bản gốc đầy đủ, mỗi bản nhỏ hơn bỏ bớt **một** chức năng. Đi theo chiều ngược lại (v1 → v30), mỗi bản thêm đúng một chức năng.
 
@@ -14,11 +14,11 @@ Dự án **Hội An Audio Guide** được tách thành 30 phiên bản: v30 là
 - v8 – Trang chủ đầy đủ (khối chủ đề, đèn lồng, hướng dẫn 3 bước)
 - v9 – Yêu thích
 - v10 – Lịch sử tham quan
+- v11 – Hàng đợi bài kế tiếp khi đang nghe
+- v12 – Tùy chọn phạm vi “điểm ở gần” 50/100/200 m
 
 ## Chưa có ở bản này (thêm ở các bản sau)
 
-- v11 – Hàng đợi bài kế tiếp khi đang nghe
-- v12 – Tùy chọn phạm vi “điểm ở gần” 50/100/200 m
 - v13 – Tự chuyển ngôn ngữ cho bài đang nghe
 - v14 – Giữ màn hình sáng (Wake Lock), tự bật lại GPS, rung báo
 - v15 – Khu Quản trị: đăng nhập (Auth Service, JWT) + quản lý địa điểm
@@ -38,20 +38,21 @@ Dự án **Hội An Audio Guide** được tách thành 30 phiên bản: v30 là
 - v29 – Test E2E trình duyệt (Playwright)
 - v30 – CI/CD GitHub Actions – BẢN ĐẦY ĐỦ (gốc)
 
-## Thay đổi so với v9
+## Thay đổi so với v11
 
-v10 = v9 + **Lịch sử tham quan**.
+v12 = v11 + **Tùy chọn phạm vi “điểm ở gần” 50/100/200 m**.
 
-Cách làm: bắt đầu từ v10, gỡ chức năng này ra để được v9. Những chỗ đã sửa khi gỡ (tức là phần v10 có thêm so với v9):
+Cách làm: bắt đầu từ v12, gỡ chức năng này ra để được v11. Những chỗ đã sửa khi gỡ (tức là phần v12 có thêm so với v11):
 
-- Xóa `apps/web/src/pages/History.tsx`; `App.tsx`: bỏ route `/history`; `Layout.tsx`: bỏ mục “Lịch sử” trên thanh điều hướng (trên + dưới).
-- `storage.ts`: bỏ `history` (danh sách 50 bài đã nghe trong localStorage) và kiểu `HistoryEntry`.
-- `tour/TourContext.tsx`: không ghi lịch sử khi phát bài (tự động hoặc thủ công).
-- 6 file ngôn ngữ: bỏ `nav.history`, `history.title`, `history.empty`, `history.clear` (giữ `history.note` vì trang Yêu thích còn dùng).
+- `tour/engine.ts`: bỏ `setNearby()`, `nearbyM`, `radiusOf()`; mỗi di tích chỉ kích hoạt trong bán kính riêng (`trigger_radius_m`, mặc định 25 m), ngưỡng sai số GPS cố định 30 m, vùng chồng lấn luôn xét `priority` trước rồi tới khoảng cách.
+- `tour/TourContext.tsx`: bỏ `nearbyRadius`, `NEARBY_RADII`, `setNearbyRadius` (và khóa lưu `hoian.nearbyRadius`).
+- `components/GpsCard.tsx`: bỏ dòng hướng dẫn và các nút chọn 50/100/200 m.
+- 6 file ngôn ngữ: bỏ `gps.nearbyHint`, `gps.nearbyRadius`. `engine.test.ts`: bỏ 5 test của chế độ điểm ở gần.
+- Lưu ý: trên laptop (định vị Wi-Fi sai số 70–100 m) thuyết minh tự động sẽ khó kích hoạt hơn.
 
 ## Đã kiểm tra
 
-- typecheck, lint, build đạt; 41 test pass (unit + integration với SQL Server).
+- typecheck, lint, build đạt; 47 test pass (unit + integration với SQL Server).
 - Integration test chạy 2–4 service + Gateway trong cùng tiến trình với SQL Server 2022 thật, CSDL tạo mới từ migration + seed của chính bản này.
 
 ## Cách chạy
