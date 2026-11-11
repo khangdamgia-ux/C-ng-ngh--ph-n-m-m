@@ -13,7 +13,7 @@
     "node": ">=22"
   },
   "scripts": {
-    "build": "npm run build -w packages/shared && npm run build -w services/gateway -w services/location -w services/content -w apps/web",
+    "build": "npm run build -w packages/shared && npm run build -w services/gateway -w services/auth -w services/location -w services/content -w apps/web",
     "typecheck": "npm run build -w packages/shared && npm run typecheck --workspaces --if-present",
     "lint": "eslint .",
     "test": "npm run build -w packages/shared && npm run test --workspaces --if-present",
@@ -35,6 +35,7 @@
     "vitest": "^2.1.8"
   },
   "dependencies": {
+    "bcryptjs": "^2.4.3",
     "mssql": "^11.0.1"
   }
 }
