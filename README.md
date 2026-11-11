@@ -10,7 +10,7 @@ Code hiện thực theo tài liệu `PRD_HoiAn_AudioGuide_v2.3` (Node.js + TypeS
 
 ## 0. Chạy nhanh nhất trên Windows
 
-Giải nén → bấm đúp **`CHAY-TAT-CA.bat`**. File này tự: mở Docker Desktop nếu chưa chạy, rồi build + khởi động toàn bộ hệ thống và mở tunnel HTTPS (`start.bat`). Giữ cửa sổ mở trong lúc dùng.
+Giải nén → bấm đúp **`CHAY-TAT-CA.bat`**. File này tự: mở Docker Desktop nếu chưa chạy, tải ảnh địa điểm còn thiếu (`tai-anh-dia-diem.bat`), rồi build + khởi động toàn bộ hệ thống và mở tunnel HTTPS (`start.bat`). Giữ cửa sổ mở trong lúc dùng.
 
 ## 1. Kiến trúc
 
@@ -18,7 +18,7 @@ Giải nén → bấm đúp **`CHAY-TAT-CA.bat`**. File này tự: mở Docker D
 Trình duyệt (React)     ──HTTPS /api/v1──► API Gateway :8080 ──► Auth :4001
    │  geofence chạy trên máy khách           (định tuyến, JWT,     Location :4002 ◄─┐ REST nội bộ
    │  (tọa độ KHÔNG gửi lên máy chủ)          rate limit, 503)      Content :4003 ──┘ X-Internal-Key
-   └─► OpenStreetMap
+   └─► OpenStreetMap                                               Analytics :4004
                                                                         │
                                                          SQL Server 2022 + thư mục media
 ```
@@ -27,12 +27,13 @@ Trình duyệt (React)     ──HTTPS /api/v1──► API Gateway :8080 ──
 |---|---|---|---|
 | Frontend | `apps/web` | Giao diện khách + Admin, bộ máy thuyết minh rảnh tay | – |
 | API Gateway | `services/gateway` | Điểm vào duy nhất, bảng định tuyến (PRD 8.3.2), xác thực JWT qua Auth, rate limit, trả 503 khi service lỗi | – |
-| Auth Service | `services/auth` | Đăng nhập, JWT, khóa tạm khi sai 5 lần (tài khoản Super Admin tạo sẵn khi seed) | Admins |
+| Auth Service | `services/auth` | Đăng nhập, JWT, khóa tạm khi sai 5 lần, tài khoản Admin | Admins |
 | Location Service | `services/location` | Địa điểm, tìm kiếm/lọc, tọa độ, mã QR | Locations, LocationCategories |
 | Content Service | `services/content` | Thuyết minh, ngôn ngữ dự phòng, âm thanh, bản dịch giao diện | Languages, Narrations, UiTranslations |
+| Analytics Service | `services/analytics` | Phiên, heartbeat, sự kiện, thống kê | VisitSessions, VisitEvents |
 | Shared | `packages/shared` | Lỗi chuẩn, middleware, gọi service nội bộ (timeout + retry), kết nối DB | – |
 
-**Giao tiếp giữa các service** (FR-20): Content → Location (kiểm tra địa điểm), Location → Content (tiêu đề theo ngôn ngữ, tìm kiếm), Gateway → Auth (xác thực token). Mọi lời gọi nội bộ có `X-Internal-Key`, `X-Request-Id`, timeout 2 s, retry GET 1 lần; service phụ lỗi thì hệ thống **suy giảm có kiểm soát** (vd. danh sách vẫn hiện khi Content lỗi).
+**Giao tiếp giữa các service** (FR-20): Content → Location (kiểm tra địa điểm), Location → Content (tiêu đề theo ngôn ngữ, tìm kiếm), Analytics → Location (tên địa điểm), Gateway → Auth (xác thực token). Mọi lời gọi nội bộ có `X-Internal-Key`, `X-Request-Id`, timeout 2 s, retry GET 1 lần; service phụ lỗi thì hệ thống **suy giảm có kiểm soát** (vd. danh sách vẫn hiện khi Content lỗi).
 
 ## 2. Cấu trúc thư mục
 
@@ -73,7 +74,7 @@ Yêu cầu: Node.js 22 LTS, npm 10, SQL Server (hoặc container: `docker run -d
 npm install
 cp .env.example .env     # DB_HOST=localhost, điền mật khẩu
 npm run db:seed          # migration + dữ liệu mẫu (chạy lại nhiều lần không bị trùng)
-npm run dev              # chạy 3 service + Gateway + Vite → http://localhost:5173
+npm run dev              # chạy 4 service + Gateway + Vite → http://localhost:5173
 ```
 
 ## 5. Định vị GPS & thuyết minh tự động
@@ -110,6 +111,7 @@ Trên điện thoại thật: website cần chạy qua **HTTPS** (Geolocation AP
 | FR-11 Bản đồ + chỉ đường | `components/MapView.tsx` (Leaflet/OSM), link Google Maps đi bộ |
 | FR-12 Yêu thích, lịch sử | `storage.ts`, `pages/Favorites.tsx`, `pages/History.tsx` |
 | FR-13–17 Quản trị | `auth/app.ts`, `location/app.ts`, `content/app.ts`, `admin/*` |
+| FR-18/19 Phiên & thống kê | `analytics/app.ts`, `analytics.ts`, `admin/Dashboard.tsx`, `admin/Stats.tsx` |
 | FR-20 Giao tiếp service | `shared/src/client.ts`, `gateway/src/routes.ts`, `gateway/src/app.ts` |
 | Định vị GPS của người dùng | `tour/providers.ts` (`BrowserGpsProvider`), `components/GpsCard.tsx`, `components/MapView.tsx` |
 | NFR-04 Bảo mật | bcrypt cost 12, JWT 60 phút, helmet, CORS, rate limit, Zod, truy vấn tham số hóa, chặn header nội bộ giả mạo |
@@ -129,6 +131,9 @@ Trên điện thoại thật: website cần chạy qua **HTTPS** (Geolocation AP
 ---
 
 
+## Nạp đủ 6 ngôn ngữ vào database đang chạy
+
+Chạy `nap-ngon-ngu.bat` (cần Docker Desktop đang chạy). Script chỉ **thêm cái còn thiếu** (ngôn ngữ, địa điểm, bản thuyết minh vi/en/fr/ko/zh/ja), không ghi đè nội dung đã sửa trong admin.
 
 ## 👥 Nhóm Thực Hiện: 09
 

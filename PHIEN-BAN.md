@@ -1,89 +1,68 @@
-# Phiên bản v14 / 16 – Hoàn thiện phía khách + Khu Quản trị đầy đủ (địa điểm, thuyết minh, thùng rác, QR, âm thanh, ngôn ngữ)
+# Phiên bản v15 / 16 – Tài khoản Admin, Analytics, Thống kê, Dashboard, script tiện ích
 
 Dự án **Hội An Audio Guide** được chia thành **16 phiên bản**. v01–v13 giữ nguyên như đã đẩy lên GitHub; v14–v16 là các bản gộp từ 17 bản nhỏ (v14–v30 của bộ 30 bản cũ).
 
-**Bản này = bản gốc v20 của bộ 30 bản** (đã gồm đủ chức năng của v14–v20). Mã nguồn không bị sửa, chỉ đổi số phiên bản.
+**Bản này = bản gốc v25 của bộ 30 bản** (đã gồm đủ chức năng của v21–v25). Mã nguồn không bị sửa, chỉ đổi số phiên bản.
 
 ## Chức năng gộp trong bản này
 
-- (gốc v14) Giữ màn hình sáng (Wake Lock), tự bật lại GPS, rung báo
-- (gốc v15) Khu Quản trị: đăng nhập (Auth Service, JWT) + quản lý địa điểm
-- (gốc v16) Soạn thuyết minh 6 ngôn ngữ trong Admin
-- (gốc v17) Thùng rác & khôi phục địa điểm
-- (gốc v18) Mã QR riêng cho từng địa điểm
-- (gốc v19) Tải lên file âm thanh MP3/M4A
-- (gốc v20) Quản lý ngôn ngữ & bản dịch giao diện trong Admin
+- (gốc v21) Quản lý tài khoản Admin (Super Admin / Editor)
+- (gốc v22) Analytics Service (ghi nhận phiên & sự kiện)
+- (gốc v23) Trang Thống kê truy cập (Admin)
+- (gốc v24) Trang Dashboard quản trị
+- (gốc v25) Script tiện ích phụ (tải ảnh, sinh ảnh SVG, nạp ngôn ngữ)
 
-## Thay đổi so với v13
+## Thay đổi so với v14
 
-v14 = v13 + **Hoàn thiện phía khách + Khu Quản trị đầy đủ (địa điểm, thuyết minh, thùng rác, QR, âm thanh, ngôn ngữ)**.
+v15 = v14 + **Tài khoản Admin, Analytics, Thống kê, Dashboard, script tiện ích**.
 
 Các gạch đầu dòng dưới đây lấy từ nhật ký tách bản gốc: chúng mô tả những chỗ đã sửa khi **gỡ** từng chức năng ra khỏi bản lớn, tức là chính phần bản này **có thêm** so với bản trước.
 
-#### (gốc v14) Giữ màn hình sáng, tự bật lại GPS và rung báo
+#### (gốc v21) Quản lý tài khoản Admin
 
-- `tour/TourContext.tsx`: bỏ Screen Wake Lock (`requestWakeLock`, tự xin lại khi quay về tab), bỏ việc nhớ trạng thái GPS (`hoian.gps`) để tự bật lại định vị khi mở lại trang, bỏ rung (`navigator.vibrate`) khi tự phát bài hoặc bị chặn âm thanh.
-- `components/TourBar.tsx`: bỏ dòng nhắc “Giữ màn hình sáng…”.
-- 6 file ngôn ngữ: bỏ khóa `tour.wakeLockHint`. README: cập nhật mục Khóa màn hình.
+- Xóa `apps/web/src/admin/Accounts.tsx` (danh sách, tạo, vô hiệu hóa tài khoản).
+- `App.tsx`: bỏ route `/admin/accounts`; `AdminLayout.tsx`: bỏ nhóm menu “Hệ thống” và cơ chế ẩn mục `superOnly`.
+- `services/auth/src/app.ts`: bỏ `GET/POST /admin/accounts`, `PUT /admin/accounts/:id`. Chỉ còn 1 tài khoản Super Admin tạo khi `db:seed`.
+- Gateway: bỏ route `/api/v1/admin/accounts`.
+- Integration test: bỏ TC18 (tạo EDITOR); test chống giả mạo header chuyển sang gọi `/admin/locations`.
 
-#### (gốc v15) Toàn bộ khu Quản trị (đăng nhập, Auth Service, quản lý địa điểm)
+#### (gốc v22) Analytics Service (ghi nhận phiên & sự kiện)
 
-- Xóa thư mục `apps/web/src/admin/` (đăng nhập, khung Admin, danh sách & sửa địa điểm, bản đồ chọn tọa độ, thêm loại địa điểm); xóa `public/favicon-admin.svg`. `admin/icons.tsx` chuyển sang `components/icons.tsx` (trang khách vẫn dùng).
-- Xóa cả `services/auth/` (đăng nhập JWT, khóa tạm sau 5 lần sai, `/auth/me`, `/internal/auth/verify` + unit test `loginLimiter`).
-- `services/location/src/app.ts`: bỏ mọi API `/admin/*` (tạo/sửa/xóa/công khai địa điểm, sửa tọa độ, tạo loại); xóa `adminActions.test.ts`. `services/content/src/app.ts`: bỏ `/admin/narrations/coverage`, `/admin/languages`.
-- Gateway: bảng định tuyến không còn cờ `auth`, bỏ xác thực token qua Auth Service và bộ nhớ đệm token.
-- `packages/shared/src/http.ts`: bỏ `requireRole`, kiểu `AdminRole`, `req.user`.
-- `App.tsx`/`main.tsx`: bỏ route `/admin/*` và `AuthProvider`; `api/client.ts`: bỏ `tokenStore` và tùy chọn `auth`; `usePageTitle.ts`: chỉ còn tiêu đề phía khách; `MapView.tsx`: bỏ chế độ bấm chọn tọa độ.
-- CSDL: bỏ bảng `Admins`; `db-migrate.mjs` không tạo Super Admin nữa; bỏ `bcryptjs`.
-- `docker-compose.yml`, Dockerfile, `dev.mjs`, `package.json`, `.env.example` (bỏ `JWT_*`, `SEED_ADMIN_*`, `AUTH_SERVICE_URL`), `start.ps1`: bỏ Auth.
-- `styles.css`: bỏ toàn bộ CSS khu Admin (~190 dòng); selector nền `body[data-area="user"]` đổi thành `body`.
-- Integration test: bỏ đăng nhập và các nhóm test quản trị; TC29 (ngôn ngữ dự phòng) chuyển vào nhóm API công khai; thêm test “không còn API quản trị → 404”.
+- Xóa cả thư mục `services/analytics/` (API phiên, heartbeat, kết thúc phiên, sự kiện + unit test).
+- Xóa `apps/web/src/analytics.ts`; bỏ mọi lời gọi `track()` / `trackQrScan()` trong `main.tsx`, `TourContext.tsx`, `pages/Detail.tsx`, `components/LangSelect.tsx`.
+- `db/migrations/V001__init.sql`: bỏ bảng `VisitSessions`, `VisitEvents`.
+- Gateway: bỏ route `/api/v1/analytics/*`, bỏ hạn mức rate limit riêng cho analytics, `/ready` chỉ còn kiểm tra 3 service.
+- `docker-compose.yml`: bỏ container `analytics`; Dockerfile: bỏ dòng copy `services/analytics`; `scripts/dev.mjs`, `package.json` (build), `.env.example`: bỏ analytics.
+- Integration test: bỏ nhóm “Thống kê” (2 test).
 
-#### (gốc v16) Soạn thuyết minh trong Admin
+#### (gốc v23) Trang Thống kê truy cập (Admin)
 
-- `admin/LocationEdit.tsx`: bỏ khối “Nội dung thuyết minh” (tab 6 ngôn ngữ, tiêu đề/tóm tắt/nội dung, trạng thái DRAFT/PUBLISHED, nghe thử).
-- `services/content/src/app.ts`: bỏ `GET /admin/locations/:id/narrations`, `GET/PUT /admin/locations/:id/narrations/:lang` và hàm `assertLocation`. Giữ `GET /admin/narrations/coverage` (bảng độ phủ bản dịch ở trang Địa điểm).
-- `services/location/src/app.ts`: bỏ API nội bộ `/internal/locations/by-id/:id/status` (chỉ phần soạn thuyết minh dùng).
-- Gateway: bỏ route `/api/v1/admin/locations/:id/narrations`.
-- Nội dung thuyết minh giờ chỉ đến từ dữ liệu seed (`db/seed/data/*.json`).
-- Integration test: thay TC21+TC29 (ghi bản dịch rồi đọc dự phòng) bằng TC29 đọc dự phòng trên dữ liệu seed (`lang=de` → EN).
+- Xóa `apps/web/src/admin/Stats.tsx` (bảng thống kê theo ngày/tuần/tháng).
+- `App.tsx`: bỏ route `/admin/stats`; `AdminLayout.tsx`: bỏ nhóm menu “Tổng quan”.
+- `services/analytics/src/app.ts`: bỏ API `GET /admin/stats/visits`. Analytics chỉ còn **ghi** phiên/sự kiện (xem trực tiếp trong CSDL).
+- `services/gateway/src/routes.ts`: bỏ route `/api/v1/admin/stats/*`.
+- Test: bỏ unit test “thống kê ngôn ngữ”, bỏ dòng route stats trong `routes.test.ts`, bỏ integration TC24.
 
-#### (gốc v17) Thùng rác & khôi phục địa điểm
+#### (gốc v24) Trang Dashboard quản trị
 
-- `admin/Locations.tsx`: bỏ tab “Thùng rác”, truy vấn `?deleted=1`, nút “Khôi phục”; thông báo xóa không còn nhắc thùng rác.
-- `services/location/src/app.ts`: bỏ tham số `deleted` của `GET /admin/locations` và API `PATCH /admin/locations/:id/restore`.
-- Xóa vẫn là xóa mềm (`deleted_at`) nhưng Admin không xem lại/khôi phục được nữa.
-- `adminActions.test.ts`: thay 6 test thùng rác/khôi phục bằng 4 test xóa mềm (`GET` chỉ lấy bản chưa xóa, `DELETE` 204/404/401).
+- Xóa `apps/web/src/admin/Dashboard.tsx` (thẻ phiên đang hoạt động, KPI, biểu đồ 7 ngày, top địa điểm, độ phủ bản dịch).
+- `App.tsx`: trang `/admin` chuyển thẳng tới `/admin/locations`. `AdminLayout.tsx`: bỏ mục menu “Dashboard”.
+- `services/analytics/src/app.ts`: bỏ API `GET /admin/stats/active-sessions` và `GET /admin/stats/top-locations` (chỉ Dashboard dùng); Analytics không còn gọi sang Location.
+- `services/location/src/app.ts`: bỏ API nội bộ `GET /internal/locations/names`.
+- `styles.css`: bỏ 81 dòng CSS của Dashboard (KPI, biểu đồ, top list, live card…).
+- Integration test: TC23 không còn đếm phiên đang hoạt động; TC24 bỏ phần top địa điểm.
 
-#### (gốc v18) Mã QR riêng cho từng địa điểm
+#### (gốc v25) Script tiện ích phụ (tải ảnh, sinh ảnh SVG, nạp ngôn ngữ)
 
-- `services/location/src/app.ts`: bỏ `GET /admin/locations/:id/qr` (sinh QR PNG/SVG trỏ tới `/l/<code>?src=qr`); `package.json`: bỏ `qrcode`, `@types/qrcode`.
-- `admin/LocationEdit.tsx`: bỏ 2 nút “Tải QR (PNG/SVG)” và hàm `downloadQr`.
-- `.env.example`: bỏ `PUBLIC_WEB_URL`. Test: bỏ integration FR-17 và dòng route `/qr` trong `routes.test.ts`.
-- Vẫn giữ QR trang chủ khi chạy `start.bat` (`scripts/share-qr.mjs`).
-
-#### (gốc v19) Tải lên file âm thanh (MP3/M4A)
-
-- `services/content/src/app.ts`: bỏ `POST /admin/narrations/:id/audio` (multer, giới hạn 5 MB), bỏ phục vụ file tĩnh `/media` và thư mục `MEDIA_DIR`.
-- `services/content/package.json`: bỏ `multer`, `@types/multer`.
-- `admin/LocationEdit.tsx`: bỏ ô chọn file âm thanh và đoạn đo thời lượng + upload sau khi lưu. Vẫn giữ `audioUrl` sẵn có (nghe thử nếu có).
-- Gateway: bỏ route `/media/*`; `nginx.conf`, `vite.config.ts`: bỏ proxy `/media`.
-- `docker-compose.yml`: bỏ volume `media` và `MEDIA_DIR`; `start.ps1`/`backup.ps1`: bỏ sao lưu/khôi phục `media.tgz`; `.env.example`, `dev.mjs`: bỏ `MEDIA_DIR`.
-- Integration test: bỏ TC41 (upload MP3 + phát qua /media có Range).
-- Người dùng vẫn nghe bằng giọng đọc tự động (TTS) hoặc file MP3 có sẵn đường dẫn http(s).
-
-#### (gốc v20) Quản lý ngôn ngữ & bản dịch giao diện trong Admin
-
-- Xóa `apps/web/src/admin/Languages.tsx` (bật/tắt ngôn ngữ, chọn mặc định, thứ tự dự phòng, thêm ngôn ngữ mới, sửa bản dịch giao diện).
-- `App.tsx`/`AdminLayout.tsx`: bỏ route và mục menu “Ngôn ngữ”.
-- `services/content/src/app.ts`: bỏ `GET /ui-translations`, `POST /admin/languages`, `PUT /admin/languages/:id`, `GET/PUT /admin/ui-translations/:lang`. Giữ `GET /languages` và `GET /admin/languages` (chỉ đọc).
-- `i18n/index.ts`: bỏ `loadUiTranslations()`; `LangSelect.tsx`: không tải bản dịch từ máy chủ nữa – giao diện dùng 6 bộ dịch dựng sẵn.
-- `V001__init.sql`: bỏ bảng `UiTranslations`. Gateway: bỏ route `ui-translations`.
-- Danh sách ngôn ngữ cố định theo dữ liệu seed (6 ngôn ngữ). `styles.css`: bỏ 20 dòng CSS của trang Ngôn ngữ.
+- Xóa `tai-anh-dia-diem.bat/.ps1` (tải ảnh .jpg từ Wikimedia – ảnh đã có sẵn trong `apps/web/public/places/`).
+- Xóa `scripts/gen-place-art.py` (sinh ảnh minh họa .svg – các file .svg đã có sẵn).
+- Xóa `nap-ngon-ngu.bat` + `scripts/nap-ngon-ngu.mjs` (nạp thêm 6 ngôn ngữ vào DB đang chạy – `db:seed` đã nạp đủ).
+- `CHAY-TAT-CA.bat`: bỏ bước 1 “tải ảnh”, chỉ còn build + khởi động.
+- Giữ `backup.bat/.ps1` và phần khôi phục trong `start.ps1` để không mất dữ liệu.
 
 ## Đã kiểm tra
 
-- Bản này chính là bản gốc v20 đã được kiểm tra: typecheck, lint, build đạt; **72 test pass** (unit + integration với SQL Server 2022).
+- Bản này chính là bản gốc v25 đã được kiểm tra: typecheck, lint, build đạt; **85 test pass** (unit + integration với SQL Server 2022).
 
 ## Cách chạy
 

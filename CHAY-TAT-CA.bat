@@ -3,7 +3,7 @@ chcp 65001 >nul
 cd /d "%~dp0"
 echo ============================================================
 echo   HOI AN AUDIO GUIDE - CHAY TAT CA (1 lan bam la xong)
-echo   Build + khoi dong he thong
+echo   1) Tai anh dia diem con thieu   2) Build + khoi dong he thong
 echo ============================================================
 echo.
 docker info >nul 2>&1
@@ -20,6 +20,9 @@ if errorlevel 1 (
   exit /b 1
 )
 :docker_ok
-echo Build va khoi dong he thong (lan dau co the mat vai phut)...
+echo [1/2] Tai anh dia diem...
+powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0tai-anh-dia-diem.ps1"
+echo.
+echo [2/2] Build va khoi dong he thong (lan dau co the mat vai phut)...
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0start.ps1"
 pause

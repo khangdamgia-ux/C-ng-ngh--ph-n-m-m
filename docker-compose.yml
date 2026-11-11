@@ -7,6 +7,7 @@ x-service: &service
     AUTH_SERVICE_URL: http://auth:4001
     LOCATION_SERVICE_URL: http://location:4002
     CONTENT_SERVICE_URL: http://content:4003
+    ANALYTICS_SERVICE_URL: http://analytics:4004
   depends_on:
     sqlserver: { condition: service_healthy }
 
@@ -55,6 +56,13 @@ services:
     user: root
     healthcheck: { test: ["CMD", "wget", "-qO-", "http://localhost:4003/health"], interval: 15s, retries: 5 }
 
+  analytics:
+    <<: *service
+    image: ${IMAGE_PREFIX:-hoian}/analytics:${IMAGE_TAG:-latest}
+    build: { context: ., dockerfile: docker/service.Dockerfile, args: { SERVICE: analytics } }
+    environment: { <<: *svc-env, PORT: "4004" }
+    healthcheck: { test: ["CMD", "wget", "-qO-", "http://localhost:4004/health"], interval: 15s, retries: 5 }
+
   gateway:
     <<: *service
     image: ${IMAGE_PREFIX:-hoian}/gateway:${IMAGE_TAG:-latest}
@@ -64,6 +72,7 @@ services:
       auth: { condition: service_healthy }
       location: { condition: service_healthy }
       content: { condition: service_healthy }
+      analytics: { condition: service_healthy }
     healthcheck: { test: ["CMD", "wget", "-qO-", "http://localhost:8080/health"], interval: 15s, retries: 5 }
     ports: ["8080:8080"]
 
