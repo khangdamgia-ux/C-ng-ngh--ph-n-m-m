@@ -1,19 +1,18 @@
-# Phiên bản v20 / 30 – Bản đồ dùng ảnh offline đóng gói sẵn
+# Phiên bản v22 / 30 – Đặc tả OpenAPI cho API công khai
 
 Dự án **Hội An Audio Guide**: v01–v15 đã đăng lên GitHub. Bản v16 (đầy đủ) cũ được tách thành **15 bản nhỏ v16–v30**; mỗi bản là chương trình hoàn chỉnh, chạy riêng được, và v30 trùng 100% mã nguồn với v16 cũ.
 
-## Thay đổi so với v19
+## Thay đổi so với v21
 
-v20 = v19 + **Bản đồ dùng ảnh offline đóng gói sẵn**.
+v22 = v21 + **Đặc tả OpenAPI cho API công khai**.
 
-- `resilientTiles.ts`: thêm `LOCAL_MANIFEST_URL`, `loadLocalSource()` dò `/tiles-local/manifest.json`.
-- `MapView.tsx`: có bộ ảnh offline thì đặt nó làm nguồn đầu tiên (offline → server mình → OSM → Esri → OSM-FR).
-- `docker/nginx.conf`: thêm `location /tiles-local/` (thiếu file trả 404 thật, cache 30 ngày).
-- README: cập nhật thứ tự nguồn bản đồ.
+- Thêm `services/gateway/src/openapi.ts`: đặc tả OpenAPI 3.0 cho nhóm API Hệ thống, Xác thực, Địa điểm, Thuyết minh, Phân tích.
+- Thêm `services/gateway/src/docs.ts`: Gateway phát đặc tả tại `GET /api/docs/openapi.json`.
+- `services/gateway/src/app.ts`: gắn `docsRouter()` trước rate limit/định tuyến.
 
 ## Thử chức năng
 
-Sau khi chạy `tiles:offline` và build lại: chặn OSM/Esri trong DevTools, bản đồ khu Phố cổ vẫn hiện.
+Mở http://localhost/api/docs/openapi.json, hoặc dán link đó vào https://editor.swagger.io.
 
 ## Đã kiểm tra
 
