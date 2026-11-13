@@ -116,7 +116,7 @@ Trên điện thoại thật: website cần chạy qua **HTTPS** (Geolocation AP
 | Định vị GPS của người dùng | `tour/providers.ts` (`BrowserGpsProvider`), `components/GpsCard.tsx`, `components/MapView.tsx` |
 | NFR-04 Bảo mật | bcrypt cost 12, JWT 60 phút, helmet, CORS, rate limit, Zod, truy vấn tham số hóa, chặn header nội bộ giả mạo |
 | NFR-09 Quyền riêng tư | tọa độ chỉ xử lý trên trình duyệt; không lưu IP |
-| NFR-10 Phục hồi | 503 có `requestId`, suy giảm có kiểm soát, Error Boundary |
+| NFR-10 Phục hồi | 503 có `requestId`, suy giảm có kiểm soát, Error Boundary, PWA cache |
 
 ## 8. Lưu ý và giới hạn đã biết
 

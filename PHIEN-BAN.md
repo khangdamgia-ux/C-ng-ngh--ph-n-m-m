@@ -1,19 +1,18 @@
-# Phiên bản v16 / 30 – PWA: cài website như ứng dụng
+# Phiên bản v17 / 30 – PWA: cache dữ liệu API khi mạng yếu
 
 Dự án **Hội An Audio Guide**: v01–v15 đã đăng lên GitHub. Bản v16 (đầy đủ) cũ được tách thành **15 bản nhỏ v16–v30**; mỗi bản là chương trình hoàn chỉnh, chạy riêng được, và v30 trùng 100% mã nguồn với v16 cũ.
 
-## Thay đổi so với v15
+## Thay đổi so với v16
 
-v16 = v15 + **PWA: cài website như ứng dụng**.
+v17 = v16 + **PWA: cache dữ liệu API khi mạng yếu**.
 
-- Thêm gói `vite-plugin-pwa` (`apps/web/package.json`, `package-lock.json`) và type `vite-plugin-pwa/client` (`apps/web/tsconfig.json`).
-- `apps/web/vite.config.ts`: bật plugin `VitePWA` với manifest (tên, màu, biểu tượng, `display: standalone`) và service worker tự cập nhật; chưa cache dữ liệu động.
-- `docker/nginx.conf`: thêm `location = /sw.js` (no-cache) để service worker mới được nhận ngay.
-- README: ghi Frontend là PWA.
+- `vite.config.ts`: thêm `runtimeCaching` NetworkFirst cho `/api/v1/locations|categories|languages|ui-translations` (timeout 4 s, lưu 7 ngày).
+- Lỗi 5xx từ máy chủ cũng rơi về dữ liệu đã lưu (plugin `fetchDidSucceed`).
+- README: NFR-10 thêm “PWA cache”.
 
 ## Thử chức năng
 
-Mở web trên điện thoại → menu trình duyệt có “Cài đặt ứng dụng / Thêm vào màn hình chính”.
+Xem vài địa điểm → tắt mạng (DevTools → Network → Offline) → tải lại: danh sách địa điểm vẫn hiện.
 
 ## Đã kiểm tra
 
