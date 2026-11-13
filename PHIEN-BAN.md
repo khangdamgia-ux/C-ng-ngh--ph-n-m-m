@@ -1,19 +1,19 @@
-# Phiên bản v19 / 30 – Script tải sẵn ảnh bản đồ Phố cổ
+# Phiên bản v20 / 30 – Bản đồ dùng ảnh offline đóng gói sẵn
 
 Dự án **Hội An Audio Guide**: v01–v15 đã đăng lên GitHub. Bản v16 (đầy đủ) cũ được tách thành **15 bản nhỏ v16–v30**; mỗi bản là chương trình hoàn chỉnh, chạy riêng được, và v30 trùng 100% mã nguồn với v16 cũ.
 
-## Thay đổi so với v18
+## Thay đổi so với v19
 
-v19 = v18 + **Script tải sẵn ảnh bản đồ Phố cổ**.
+v20 = v19 + **Bản đồ dùng ảnh offline đóng gói sẵn**.
 
-- Thêm `scripts/tiles-offline.mjs`: tải ảnh bản đồ khu Phố cổ (zoom 14–18) vào `apps/web/public/tiles-local/` kèm `manifest.json`.
-- `package.json`: thêm lệnh `npm run tiles:offline`.
-- README: thêm mục “Chống mất mạng hoàn toàn”.
-- Web chưa dùng bộ ảnh này (bản sau mới nối vào bản đồ).
+- `resilientTiles.ts`: thêm `LOCAL_MANIFEST_URL`, `loadLocalSource()` dò `/tiles-local/manifest.json`.
+- `MapView.tsx`: có bộ ảnh offline thì đặt nó làm nguồn đầu tiên (offline → server mình → OSM → Esri → OSM-FR).
+- `docker/nginx.conf`: thêm `location /tiles-local/` (thiếu file trả 404 thật, cache 30 ngày).
+- README: cập nhật thứ tự nguồn bản đồ.
 
 ## Thử chức năng
 
-Chạy `npm run tiles:offline` (cần Internet) → kiểm tra thư mục `apps/web/public/tiles-local/`.
+Sau khi chạy `tiles:offline` và build lại: chặn OSM/Esri trong DevTools, bản đồ khu Phố cổ vẫn hiện.
 
 ## Đã kiểm tra
 
