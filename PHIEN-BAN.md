@@ -1,19 +1,17 @@
-# Phiên bản v20 / 30 – Bản đồ dùng ảnh offline đóng gói sẵn
+# Phiên bản v21 / 30 – PWA cache bộ ảnh bản đồ offline
 
 Dự án **Hội An Audio Guide**: v01–v15 đã đăng lên GitHub. Bản v16 (đầy đủ) cũ được tách thành **15 bản nhỏ v16–v30**; mỗi bản là chương trình hoàn chỉnh, chạy riêng được, và v30 trùng 100% mã nguồn với v16 cũ.
 
-## Thay đổi so với v19
+## Thay đổi so với v20
 
-v20 = v19 + **Bản đồ dùng ảnh offline đóng gói sẵn**.
+v21 = v20 + **PWA cache bộ ảnh bản đồ offline**.
 
-- `resilientTiles.ts`: thêm `LOCAL_MANIFEST_URL`, `loadLocalSource()` dò `/tiles-local/manifest.json`.
-- `MapView.tsx`: có bộ ảnh offline thì đặt nó làm nguồn đầu tiên (offline → server mình → OSM → Esri → OSM-FR).
-- `docker/nginx.conf`: thêm `location /tiles-local/` (thiếu file trả 404 thật, cache 30 ngày).
-- README: cập nhật thứ tự nguồn bản đồ.
+- `vite.config.ts`: `/tiles-local` không bị điều hướng về trang SPA; cache `manifest.json` (StaleWhileRevalidate) và ô `/tiles-local/*.png` chung với cache ảnh bản đồ.
+- Bản này trùng mã nguồn với bản gốc v27 (bản đồ offline).
 
 ## Thử chức năng
 
-Sau khi chạy `tiles:offline` và build lại: chặn OSM/Esri trong DevTools, bản đồ khu Phố cổ vẫn hiện.
+Như v20, thêm: mở lại web khi đã tắt mạng, bản đồ offline vẫn nạp được từ cache.
 
 ## Đã kiểm tra
 
