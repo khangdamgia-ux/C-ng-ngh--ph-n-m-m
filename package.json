@@ -20,7 +20,8 @@
     "test:integration": "npm run build -w packages/shared && vitest run --config tests/integration/vitest.config.ts",
     "db:migrate": "node scripts/db-migrate.mjs",
     "db:seed": "node scripts/generate-seed.mjs && node scripts/db-migrate.mjs --seed",
-    "dev": "npm run build -w packages/shared && node scripts/dev.mjs"
+    "dev": "npm run build -w packages/shared && node scripts/dev.mjs",
+    "tiles:offline": "node scripts/tiles-offline.mjs"
   },
   "devDependencies": {
     "@eslint/js": "^9.17.0",
