@@ -15,7 +15,7 @@ Giải nén → bấm đúp **`CHAY-TAT-CA.bat`**. File này tự: mở Docker D
 ## 1. Kiến trúc
 
 ```
-Trình duyệt (React)     ──HTTPS /api/v1──► API Gateway :8080 ──► Auth :4001
+Trình duyệt (React PWA) ──HTTPS /api/v1──► API Gateway :8080 ──► Auth :4001
    │  geofence chạy trên máy khách           (định tuyến, JWT,     Location :4002 ◄─┐ REST nội bộ
    │  (tọa độ KHÔNG gửi lên máy chủ)          rate limit, 503)      Content :4003 ──┘ X-Internal-Key
    └─► OpenStreetMap                                               Analytics :4004
@@ -25,7 +25,7 @@ Trình duyệt (React)     ──HTTPS /api/v1──► API Gateway :8080 ──
 
 | Thành phần | Thư mục | Trách nhiệm | Bảng sở hữu |
 |---|---|---|---|
-| Frontend | `apps/web` | Giao diện khách + Admin, bộ máy thuyết minh rảnh tay | – |
+| Frontend | `apps/web` | Giao diện khách + Admin, bộ máy thuyết minh rảnh tay, PWA | – |
 | API Gateway | `services/gateway` | Điểm vào duy nhất, bảng định tuyến (PRD 8.3.2), xác thực JWT qua Auth, rate limit, trả 503 khi service lỗi | – |
 | Auth Service | `services/auth` | Đăng nhập, JWT, khóa tạm khi sai 5 lần, tài khoản Admin | Admins |
 | Location Service | `services/location` | Địa điểm, tìm kiếm/lọc, tọa độ, mã QR | Locations, LocationCategories |
