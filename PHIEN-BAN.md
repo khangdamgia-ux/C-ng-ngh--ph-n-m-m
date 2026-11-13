@@ -1,18 +1,19 @@
-# Phiên bản v17 / 30 – PWA: cache dữ liệu API khi mạng yếu
+# Phiên bản v18 / 30 – PWA: cache ảnh địa điểm, âm thanh, ảnh bản đồ
 
 Dự án **Hội An Audio Guide**: v01–v15 đã đăng lên GitHub. Bản v16 (đầy đủ) cũ được tách thành **15 bản nhỏ v16–v30**; mỗi bản là chương trình hoàn chỉnh, chạy riêng được, và v30 trùng 100% mã nguồn với v16 cũ.
 
-## Thay đổi so với v16
+## Thay đổi so với v17
 
-v17 = v16 + **PWA: cache dữ liệu API khi mạng yếu**.
+v18 = v17 + **PWA: cache ảnh địa điểm, âm thanh, ảnh bản đồ**.
 
-- `vite.config.ts`: thêm `runtimeCaching` NetworkFirst cho `/api/v1/locations|categories|languages|ui-translations` (timeout 4 s, lưu 7 ngày).
-- Lỗi 5xx từ máy chủ cũng rơi về dữ liệu đã lưu (plugin `fetchDidSucceed`).
-- README: NFR-10 thêm “PWA cache”.
+- `vite.config.ts`: cache ảnh `/places/*.jpg` (StaleWhileRevalidate), file âm thanh `/media/` (CacheFirst, hỗ trợ tua), ảnh bản đồ mọi nguồn (chỉ lưu ô 200 + đúng là ảnh).
+- `main.tsx`: dọn cache ảnh bản đồ của phiên bản cũ.
+- `resilientTiles.ts`: cập nhật chú thích.
+- Bản này trùng mã nguồn với bản gốc v26 (PWA) của bộ 30 bản.
 
 ## Thử chức năng
 
-Xem vài địa điểm → tắt mạng (DevTools → Network → Offline) → tải lại: danh sách địa điểm vẫn hiện.
+Nghe một bài có âm thanh, mở bản đồ → tắt mạng: ảnh, âm thanh và vùng bản đồ đã xem vẫn dùng được.
 
 ## Đã kiểm tra
 
