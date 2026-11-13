@@ -1,18 +1,18 @@
-# Phiên bản v22 / 30 – Đặc tả OpenAPI cho API công khai
+# Phiên bản v23 / 30 – Swagger UI + tài liệu API quản trị
 
 Dự án **Hội An Audio Guide**: v01–v15 đã đăng lên GitHub. Bản v16 (đầy đủ) cũ được tách thành **15 bản nhỏ v16–v30**; mỗi bản là chương trình hoàn chỉnh, chạy riêng được, và v30 trùng 100% mã nguồn với v16 cũ.
 
-## Thay đổi so với v21
+## Thay đổi so với v22
 
-v22 = v21 + **Đặc tả OpenAPI cho API công khai**.
+v23 = v22 + **Swagger UI + tài liệu API quản trị**.
 
-- Thêm `services/gateway/src/openapi.ts`: đặc tả OpenAPI 3.0 cho nhóm API Hệ thống, Xác thực, Địa điểm, Thuyết minh, Phân tích.
-- Thêm `services/gateway/src/docs.ts`: Gateway phát đặc tả tại `GET /api/docs/openapi.json`.
-- `services/gateway/src/app.ts`: gắn `docsRouter()` trước rate limit/định tuyến.
+- `openapi.ts`: bổ sung toàn bộ API quản trị (địa điểm, thuyết minh, âm thanh, ngôn ngữ, thống kê, tài khoản) và các schema đi kèm.
+- `docs.ts`: thêm trang Swagger UI tại `/api/docs` (tải giao diện từ CDN, hỗ trợ dark mode); đăng nhập xong tự điền token vào nút Authorize.
+- `app.ts`: đặt `docsRouter()` trước helmet để trang Swagger nạp được script CDN.
 
 ## Thử chức năng
 
-Mở http://localhost/api/docs/openapi.json, hoặc dán link đó vào https://editor.swagger.io.
+Mở http://localhost/api/docs → gọi `POST /api/v1/auth/login` → thử một API có ổ khóa.
 
 ## Đã kiểm tra
 
