@@ -131,6 +131,10 @@ Trên điện thoại thật: website cần chạy qua **HTTPS** (Geolocation AP
 
 ---
 
+## Tài liệu API (Swagger)
+
+Sau khi chạy `start.bat` (Docker) mở `http://localhost/api/docs`, hoặc bấm đúp `mo-api-docs.bat`. Chạy dev: `http://localhost:5173/api/docs`. Đăng nhập bằng `POST /api/v1/auth/login` → token tự điền vào nút Authorize. Spec viết tay ở `services/gateway/src/openapi.ts`.
+
 
 ## Nạp đủ 6 ngôn ngữ vào database đang chạy
 

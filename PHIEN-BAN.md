@@ -1,18 +1,18 @@
-# Phiên bản v23 / 30 – Swagger UI + tài liệu API quản trị
+# Phiên bản v24 / 30 – Lối tắt mở tài liệu API
 
 Dự án **Hội An Audio Guide**: v01–v15 đã đăng lên GitHub. Bản v16 (đầy đủ) cũ được tách thành **15 bản nhỏ v16–v30**; mỗi bản là chương trình hoàn chỉnh, chạy riêng được, và v30 trùng 100% mã nguồn với v16 cũ.
 
-## Thay đổi so với v22
+## Thay đổi so với v23
 
-v23 = v22 + **Swagger UI + tài liệu API quản trị**.
+v24 = v23 + **Lối tắt mở tài liệu API**.
 
-- `openapi.ts`: bổ sung toàn bộ API quản trị (địa điểm, thuyết minh, âm thanh, ngôn ngữ, thống kê, tài khoản) và các schema đi kèm.
-- `docs.ts`: thêm trang Swagger UI tại `/api/docs` (tải giao diện từ CDN, hỗ trợ dark mode); đăng nhập xong tự điền token vào nút Authorize.
-- `app.ts`: đặt `docsRouter()` trước helmet để trang Swagger nạp được script CDN.
+- Thêm `mo-api-docs.bat` (bấm đúp mở http://localhost/api/docs).
+- README: thêm mục “Tài liệu API (Swagger)”.
+- Bản này trùng mã nguồn với bản gốc v28 (Swagger).
 
 ## Thử chức năng
 
-Mở http://localhost/api/docs → gọi `POST /api/v1/auth/login` → thử một API có ổ khóa.
+Bấm đúp `mo-api-docs.bat` khi hệ thống đang chạy.
 
 ## Đã kiểm tra
 
