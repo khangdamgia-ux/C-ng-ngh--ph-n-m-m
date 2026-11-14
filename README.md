@@ -49,7 +49,7 @@ db/migrations/V001__init.sql   ← lược đồ CSDL (PRD Phần XII)
 db/seed/data/*.json            ← 15 di tích + 90 bài thuyết minh (6 ngôn ngữ, PRD Phụ lục A, C)
 tests/integration/             ← 32 test API với SQL Server thật
 tests/e2e/handsfree.mjs        ← test trình duyệt: 1 chạm → tự thuyết minh 8 di tích
-docker/, docker-compose.yml, .github/workflows/ci.yml
+docker/, docker-compose.yml, .github/workflows/ci.yml, cd.yml
 ```
 
 ## 3. Chạy nhanh bằng Docker (khuyên dùng)
@@ -100,8 +100,7 @@ Trên điện thoại thật: website cần chạy qua **HTTPS** (Geolocation AP
 | `npm run test:integration` | 32 test API qua Gateway với SQL Server thật (cần `npm run db:seed` trước) |
 | `npm run test:e2e` | Trình duyệt thật: 1 chạm → tự thuyết minh 8/8 di tích (cần hệ thống đang chạy; lần đầu `npx playwright install chromium`; đặt `BASE_URL`) |
 
-CI (`.github/workflows/ci.yml`) chạy lint → type check → unit test → build → integration test (SQL Server service container) → build Docker image → E2E mỗi khi push hoặc mở pull request vào `develop`/`main`.
-
+CI (`.github/workflows/ci.yml`) chạy lint → type check → unit test → build → integration test (SQL Server service container) → build Docker image → E2E. CD (`cd.yml`) đẩy image lên GHCR và triển khai qua SSH, có health check và tự rollback (bật bằng biến `DEPLOY_ENABLED=true` + secrets `DEPLOY_HOST`, `DEPLOY_USER`, `DEPLOY_SSH_KEY`).
 
 ## 7. Đối chiếu PRD → code
 
