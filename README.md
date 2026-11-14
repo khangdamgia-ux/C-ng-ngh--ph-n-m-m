@@ -4,7 +4,7 @@
 
 Khách mở website (quét QR), chạm **một lần** “Bật định vị của tôi”; từ đó website hiện **vị trí GPS của chính khách** trên bản đồ, di tích gần nhất, và **tự phát thuyết minh** khi khách đến gần di tích bằng 6 ngôn ngữ (Tiếng Việt, English, 한국어, 中文, 日本語, Français). Đổi ngôn ngữ giữa chừng thì bài đang nghe **tự chuyển sang ngôn ngữ mới**.
 
-Code hiện thực theo tài liệu `PRD_HoiAn_AudioGuide_v2.3` (Node.js + TypeScript, React + Vite, SQL Server, Microservices, Docker, GitHub Actions).
+Code hiện thực theo tài liệu `PRD_HoiAn_AudioGuide_v2.3` (Node.js + TypeScript, React + Vite, SQL Server, Microservices, Docker).
 
 ---
 
@@ -48,8 +48,7 @@ services/*/src/app.ts   ← mỗi service một file app, dễ đọc và test
 db/migrations/V001__init.sql   ← lược đồ CSDL (PRD Phần XII)
 db/seed/data/*.json            ← 15 di tích + 90 bài thuyết minh (6 ngôn ngữ, PRD Phụ lục A, C)
 tests/integration/             ← 32 test API với SQL Server thật
-tests/e2e/handsfree.mjs        ← test trình duyệt: 1 chạm → tự thuyết minh 8 di tích
-docker/, docker-compose.yml, .github/workflows/ci.yml
+docker/, docker-compose.yml
 ```
 
 ## 3. Chạy nhanh bằng Docker (khuyên dùng)
@@ -98,9 +97,6 @@ Trên điện thoại thật: website cần chạy qua **HTTPS** (Geolocation AP
 | `npm run typecheck` | Kiểm tra kiểu TypeScript |
 | `npm test` | Unit test: bộ máy geofence (TC12, TC13, TC30, TC31, TC44…), ngôn ngữ dự phòng, bảng định tuyến Gateway, khóa đăng nhập, Haversine, tách câu giọng đọc |
 | `npm run test:integration` | 32 test API qua Gateway với SQL Server thật (cần `npm run db:seed` trước) |
-| `npm run test:e2e` | Trình duyệt thật: 1 chạm → tự thuyết minh 8/8 di tích (cần hệ thống đang chạy; lần đầu `npx playwright install chromium`; đặt `BASE_URL`) |
-
-CI (`.github/workflows/ci.yml`) chạy lint → type check → unit test → build mỗi khi push hoặc mở pull request vào `develop`/`main`.
 
 
 ## 7. Đối chiếu PRD → code
@@ -120,7 +116,7 @@ CI (`.github/workflows/ci.yml`) chạy lint → type check → unit test → bui
 | Định vị GPS của người dùng | `tour/providers.ts` (`BrowserGpsProvider`), `components/GpsCard.tsx`, `components/MapView.tsx` |
 | NFR-04 Bảo mật | bcrypt cost 12, JWT 60 phút, helmet, CORS, rate limit, Zod, truy vấn tham số hóa, chặn header nội bộ giả mạo |
 | NFR-09 Quyền riêng tư | tọa độ chỉ xử lý trên trình duyệt; không lưu IP |
-| NFR-10 Phục hồi | 503 có `requestId`, suy giảm có kiểm soát, Error Boundary, PWA cache |
+| NFR-10 Phục hồi | 503 có `requestId`, suy giảm có kiểm soát, Error Boundary |
 
 ## 8. Lưu ý và giới hạn đã biết
 
@@ -129,15 +125,10 @@ CI (`.github/workflows/ci.yml`) chạy lint → type check → unit test → bui
 - **Tọa độ 15 di tích là tham khảo**, cần đo lại tại thực địa. **Giá vé** để trống, chờ Admin nhập. Nội dung lịch sử cần đối chiếu nguồn chính thống (xem PRD Phụ lục C).
 - `bcryptjs` (bcrypt viết bằng JavaScript thuần, cùng thuật toán, không cần biên dịch native) được dùng thay `bcrypt`.
 - `npm audit` báo lỗ hổng của `braces`/`micromatch` (phụ thuộc của `http-proxy-middleware`). Lỗ hổng chỉ khai thác được khi glob do người dùng nhập, mà Gateway định tuyến bằng hàm, không dùng glob.
-- **Bản đồ không còn nền xám:** mỗi ô ảnh nền tự thử lần lượt nhiều nguồn độc lập (ảnh offline đóng gói sẵn → server của mình → OSM → Esri → OSM-FR; không dùng CARTO vì nó đóng dấu "API KEY REQUIRED"), có timeout, tự thử lại khi mạng chập chờn/có mạng lại/quay lại tab, và từ chối ô "bị chặn". Nếu tất cả nguồn đều không tới được, nền là giấy be + lưới, kèm thông báo và nút "Thử lại"; các điểm tham quan vẫn dùng bình thường (`apps/web/src/components/resilientTiles.ts`).
-- **Chống mất mạng hoàn toàn:** chạy **một lần** `npm run tiles:offline` (cần Internet) để tải ~vài trăm ô của khu Phố cổ vào `apps/web/public/tiles-local/`, rồi build lại. Từ đó bản đồ khu Phố cổ (zoom 14–18) đi cùng website, không phụ thuộc mạng của từng máy.
+- **Bản đồ không còn nền xám:** mỗi ô ảnh nền tự thử lần lượt nhiều nguồn độc lập (server của mình → OSM → Esri → OSM-FR; không dùng CARTO vì nó đóng dấu "API KEY REQUIRED"), có timeout, tự thử lại khi mạng chập chờn/có mạng lại/quay lại tab, và từ chối ô "bị chặn". Nếu tất cả nguồn đều không tới được, nền là giấy be + lưới, kèm thông báo và nút "Thử lại"; các điểm tham quan vẫn dùng bình thường (`apps/web/src/components/resilientTiles.ts`).
 - Khi triển khai lượng truy cập lớn nên dùng nhà cung cấp tile riêng theo chính sách sử dụng của OSM.
 
 ---
-
-## Tài liệu API (Swagger)
-
-Sau khi chạy `start.bat` (Docker) mở `http://localhost/api/docs`, hoặc bấm đúp `mo-api-docs.bat`. Chạy dev: `http://localhost:5173/api/docs`. Đăng nhập bằng `POST /api/v1/auth/login` → token tự điền vào nút Authorize. Spec viết tay ở `services/gateway/src/openapi.ts`.
 
 
 ## Nạp đủ 6 ngôn ngữ vào database đang chạy

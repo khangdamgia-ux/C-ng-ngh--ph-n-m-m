@@ -1,17 +1,19 @@
-# Phiên bản v27 / 30 – CI: lint, type check, unit test, build
+# Phiên bản v16 / 30 – PWA: cài website như ứng dụng
 
 Dự án **Hội An Audio Guide**: v01–v15 đã đăng lên GitHub. Bản v16 (đầy đủ) cũ được tách thành **15 bản nhỏ v16–v30**; mỗi bản là chương trình hoàn chỉnh, chạy riêng được, và v30 trùng 100% mã nguồn với v16 cũ.
 
-## Thay đổi so với v26
+## Thay đổi so với v15
 
-v27 = v26 + **CI: lint, type check, unit test, build**.
+v16 = v15 + **PWA: cài website như ứng dụng**.
 
-- Thêm `.github/workflows/ci.yml` với job `quality`: `npm ci` → lint → typecheck → unit test → build, chạy khi push/PR vào `develop`, `main`.
-- README: thêm GitHub Actions vào công nghệ, thêm `ci.yml` vào cây thư mục và đoạn mô tả CI.
+- Thêm gói `vite-plugin-pwa` (`apps/web/package.json`, `package-lock.json`) và type `vite-plugin-pwa/client` (`apps/web/tsconfig.json`).
+- `apps/web/vite.config.ts`: bật plugin `VitePWA` với manifest (tên, màu, biểu tượng, `display: standalone`) và service worker tự cập nhật; chưa cache dữ liệu động.
+- `docker/nginx.conf`: thêm `location = /sw.js` (no-cache) để service worker mới được nhận ngay.
+- README: ghi Frontend là PWA.
 
 ## Thử chức năng
 
-Đẩy lên GitHub → tab **Actions** → workflow “CI” chạy job “Lint · Type check · Unit test · Build”.
+Mở web trên điện thoại → menu trình duyệt có “Cài đặt ứng dụng / Thêm vào màn hình chính”.
 
 ## Đã kiểm tra
 
