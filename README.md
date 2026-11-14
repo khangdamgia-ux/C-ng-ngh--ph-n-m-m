@@ -100,7 +100,7 @@ Trên điện thoại thật: website cần chạy qua **HTTPS** (Geolocation AP
 | `npm run test:integration` | 32 test API qua Gateway với SQL Server thật (cần `npm run db:seed` trước) |
 | `npm run test:e2e` | Trình duyệt thật: 1 chạm → tự thuyết minh 8/8 di tích (cần hệ thống đang chạy; lần đầu `npx playwright install chromium`; đặt `BASE_URL`) |
 
-CI (`.github/workflows/ci.yml`) chạy lint → type check → unit test → build → integration test (SQL Server service container) → build Docker image mỗi khi push hoặc mở pull request vào `develop`/`main`.
+CI (`.github/workflows/ci.yml`) chạy lint → type check → unit test → build → integration test (SQL Server service container) → build Docker image → E2E mỗi khi push hoặc mở pull request vào `develop`/`main`.
 
 
 ## 7. Đối chiếu PRD → code
