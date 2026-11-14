@@ -1,18 +1,17 @@
-# Phiên bản v25 / 30 – Test E2E: 1 chạm → tự thuyết minh 8 di tích
+# Phiên bản v26 / 30 – Test E2E: đổi ngôn ngữ khi đang nghe
 
 Dự án **Hội An Audio Guide**: v01–v15 đã đăng lên GitHub. Bản v16 (đầy đủ) cũ được tách thành **15 bản nhỏ v16–v30**; mỗi bản là chương trình hoàn chỉnh, chạy riêng được, và v30 trùng 100% mã nguồn với v16 cũ.
 
-## Thay đổi so với v24
+## Thay đổi so với v25
 
-v25 = v24 + **Test E2E: 1 chạm → tự thuyết minh 8 di tích**.
+v26 = v25 + **Test E2E: đổi ngôn ngữ khi đang nghe**.
 
-- Thêm devDependency `playwright` và lệnh `npm run test:e2e` (`package.json`, `package-lock.json`).
-- Thêm `tests/e2e/handsfree.mjs`: bấm “Bật định vị” một lần, giả lập GPS đứng lần lượt tại 8 di tích, kiểm tra hệ thống tự thuyết minh đủ 8 di tích đúng thứ tự, không có lỗi trang.
-- README: thêm dòng `tests/e2e/` và lệnh `npm run test:e2e`.
+- `tests/e2e/handsfree.mjs`: thêm kịch bản đang nghe Chùa Cầu tiếng Việt, đổi sang English → kiểm tra thuyết minh tự chuyển sang `en-US`.
+- Bản này trùng mã nguồn với bản gốc v29 (test E2E).
 
 ## Thử chức năng
 
-Hệ thống đang chạy → `npx playwright install chromium` (lần đầu) → `set BASE_URL=http://localhost` → `npm run test:e2e`.
+Như v25.
 
 ## Đã kiểm tra
 
