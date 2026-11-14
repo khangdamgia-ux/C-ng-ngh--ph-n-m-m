@@ -4,7 +4,7 @@
 
 Khách mở website (quét QR), chạm **một lần** “Bật định vị của tôi”; từ đó website hiện **vị trí GPS của chính khách** trên bản đồ, di tích gần nhất, và **tự phát thuyết minh** khi khách đến gần di tích bằng 6 ngôn ngữ (Tiếng Việt, English, 한국어, 中文, 日本語, Français). Đổi ngôn ngữ giữa chừng thì bài đang nghe **tự chuyển sang ngôn ngữ mới**.
 
-Code hiện thực theo tài liệu `PRD_HoiAn_AudioGuide_v2.3` (Node.js + TypeScript, React + Vite, SQL Server, Microservices, Docker).
+Code hiện thực theo tài liệu `PRD_HoiAn_AudioGuide_v2.3` (Node.js + TypeScript, React + Vite, SQL Server, Microservices, Docker, GitHub Actions).
 
 ---
 
@@ -49,7 +49,7 @@ db/migrations/V001__init.sql   ← lược đồ CSDL (PRD Phần XII)
 db/seed/data/*.json            ← 15 di tích + 90 bài thuyết minh (6 ngôn ngữ, PRD Phụ lục A, C)
 tests/integration/             ← 32 test API với SQL Server thật
 tests/e2e/handsfree.mjs        ← test trình duyệt: 1 chạm → tự thuyết minh 8 di tích
-docker/, docker-compose.yml
+docker/, docker-compose.yml, .github/workflows/ci.yml
 ```
 
 ## 3. Chạy nhanh bằng Docker (khuyên dùng)
@@ -99,6 +99,8 @@ Trên điện thoại thật: website cần chạy qua **HTTPS** (Geolocation AP
 | `npm test` | Unit test: bộ máy geofence (TC12, TC13, TC30, TC31, TC44…), ngôn ngữ dự phòng, bảng định tuyến Gateway, khóa đăng nhập, Haversine, tách câu giọng đọc |
 | `npm run test:integration` | 32 test API qua Gateway với SQL Server thật (cần `npm run db:seed` trước) |
 | `npm run test:e2e` | Trình duyệt thật: 1 chạm → tự thuyết minh 8/8 di tích (cần hệ thống đang chạy; lần đầu `npx playwright install chromium`; đặt `BASE_URL`) |
+
+CI (`.github/workflows/ci.yml`) chạy lint → type check → unit test → build mỗi khi push hoặc mở pull request vào `develop`/`main`.
 
 
 ## 7. Đối chiếu PRD → code
