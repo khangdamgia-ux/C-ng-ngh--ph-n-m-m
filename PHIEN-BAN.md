@@ -1,18 +1,18 @@
-# Phiên bản v24 / 30 – Lối tắt mở tài liệu API
+# Phiên bản v25 / 30 – Test E2E: 1 chạm → tự thuyết minh 8 di tích
 
 Dự án **Hội An Audio Guide**: v01–v15 đã đăng lên GitHub. Bản v16 (đầy đủ) cũ được tách thành **15 bản nhỏ v16–v30**; mỗi bản là chương trình hoàn chỉnh, chạy riêng được, và v30 trùng 100% mã nguồn với v16 cũ.
 
-## Thay đổi so với v23
+## Thay đổi so với v24
 
-v24 = v23 + **Lối tắt mở tài liệu API**.
+v25 = v24 + **Test E2E: 1 chạm → tự thuyết minh 8 di tích**.
 
-- Thêm `mo-api-docs.bat` (bấm đúp mở http://localhost/api/docs).
-- README: thêm mục “Tài liệu API (Swagger)”.
-- Bản này trùng mã nguồn với bản gốc v28 (Swagger).
+- Thêm devDependency `playwright` và lệnh `npm run test:e2e` (`package.json`, `package-lock.json`).
+- Thêm `tests/e2e/handsfree.mjs`: bấm “Bật định vị” một lần, giả lập GPS đứng lần lượt tại 8 di tích, kiểm tra hệ thống tự thuyết minh đủ 8 di tích đúng thứ tự, không có lỗi trang.
+- README: thêm dòng `tests/e2e/` và lệnh `npm run test:e2e`.
 
 ## Thử chức năng
 
-Bấm đúp `mo-api-docs.bat` khi hệ thống đang chạy.
+Hệ thống đang chạy → `npx playwright install chromium` (lần đầu) → `set BASE_URL=http://localhost` → `npm run test:e2e`.
 
 ## Đã kiểm tra
 

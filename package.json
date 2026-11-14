@@ -21,6 +21,7 @@
     "db:migrate": "node scripts/db-migrate.mjs",
     "db:seed": "node scripts/generate-seed.mjs && node scripts/db-migrate.mjs --seed",
     "dev": "npm run build -w packages/shared && node scripts/dev.mjs",
+    "test:e2e": "node tests/e2e/handsfree.mjs",
     "tiles:offline": "node scripts/tiles-offline.mjs"
   },
   "devDependencies": {
@@ -33,7 +34,8 @@
     "tsx": "^4.19.2",
     "typescript": "^5.7.2",
     "typescript-eslint": "^8.18.1",
-    "vitest": "^2.1.8"
+    "vitest": "^2.1.8",
+    "playwright": "^1.49.1"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
