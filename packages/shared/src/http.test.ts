@@ -3,7 +3,7 @@ import request from 'supertest';
 import { afterEach, describe, expect, it } from 'vitest';
 import { z } from 'zod';
 import { badRequest } from './errors.js';
-import { asyncHandler, finalize, parse, requestId, requireInternalKey, requireRole } from './http.js';
+import { asyncHandler, createBaseApp, finalize, parse, requestId, requireInternalKey, requireRole } from './http.js';
 import type { Logger } from './logger.js';
 
 const silent: Logger = { info: () => {}, warn: () => {}, error: () => {} };
@@ -161,5 +161,25 @@ describe('errorHandler và finalize', () => {
     expect(res.body.error.code).toBe('INTERNAL_ERROR');
     expect(JSON.stringify(res.body)).not.toContain('bi-mat');
     expect(errors).toHaveLength(1);
+  });
+});
+
+describe('createBaseApp', () => {
+  const app = finalize(createBaseApp('test-service', { db: false }), silent);
+
+  it('/health trả trạng thái ok và tên service', async () => {
+    const res = await request(app).get('/health');
+    expect(res.status).toBe(200);
+    expect(res.body).toEqual({ status: 'ok', service: 'test-service' });
+  });
+
+  it('/ready trả ready khi service không cần DB', async () => {
+    const res = await request(app).get('/ready');
+    expect(res.body).toEqual({ status: 'ready', service: 'test-service' });
+  });
+
+  it('không lộ header X-Powered-By', async () => {
+    const res = await request(app).get('/health');
+    expect(res.headers['x-powered-by']).toBeUndefined();
   });
 });
