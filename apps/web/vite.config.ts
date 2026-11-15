@@ -112,5 +112,19 @@ export default defineConfig({
       },
     },
   },
+  build: {
+    rollupOptions: {
+      output: {
+        // Tách thư viện ít thay đổi ra chunk riêng: sửa mã của nhóm thì trình duyệt/PWA
+        // chỉ phải tải lại phần mã đó, không tải lại React, Leaflet, i18next.
+        manualChunks: {
+          react: ['react', 'react-dom', 'react-router-dom'],
+          leaflet: ['leaflet', 'react-leaflet'],
+          i18n: ['i18next', 'react-i18next'],
+          query: ['@tanstack/react-query'],
+        },
+      },
+    },
+  },
   test: { environment: 'node' },
 });
