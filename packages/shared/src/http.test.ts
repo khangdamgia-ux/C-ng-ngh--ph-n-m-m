@@ -1,7 +1,9 @@
 import express from 'express';
 import request from 'supertest';
 import { afterEach, describe, expect, it } from 'vitest';
-import { finalize, requestId, requireInternalKey, requireRole } from './http.js';
+import { z } from 'zod';
+import { badRequest } from './errors.js';
+import { asyncHandler, finalize, parse, requestId, requireInternalKey, requireRole } from './http.js';
 import type { Logger } from './logger.js';
 
 const silent: Logger = { info: () => {}, warn: () => {}, error: () => {} };
@@ -97,5 +99,67 @@ describe('requireRole', () => {
   it('không giới hạn vai trò khi không truyền vai trò nào', async () => {
     const res = await request(appWith(requireRole())).get('/t').set('X-User-Id', '1').set('X-User-Role', 'EDITOR');
     expect(res.status).toBe(200);
+  });
+});
+
+describe('errorHandler và finalize', () => {
+  const errors: string[] = [];
+  const spyLogger: Logger = { ...silent, error: (msg) => void errors.push(msg) };
+
+  function failing(handler: express.RequestHandler) {
+    const app = express();
+    app.use(requestId);
+    app.use(express.json());
+    app.post('/t', handler);
+    return finalize(app, spyLogger);
+  }
+
+  it('route không tồn tại → 404 NOT_FOUND kèm requestId', async () => {
+    const res = await request(appWith()).get('/khong-co');
+    expect(res.status).toBe(404);
+    expect(res.body.error.code).toBe('NOT_FOUND');
+    expect(res.body.error.requestId).toBe(res.headers['x-request-id']);
+  });
+
+  it('ZodError → 400 kèm danh sách trường sai', async () => {
+    const schema = z.object({ code: z.string().min(1), lat: z.number() });
+    const res = await request(failing((req, res) => void res.json(parse(schema, req.body)))).post('/t').send({ code: '' });
+    expect(res.status).toBe(400);
+    expect(res.body.error.code).toBe('VALIDATION_ERROR');
+    expect(res.body.error.details.map((d: { field: string }) => d.field).sort()).toEqual(['code', 'lat']);
+  });
+
+  it('AppError → đúng mã HTTP và mã lỗi', async () => {
+    const res = await request(
+      failing(() => {
+        throw badRequest('Sai dữ liệu', [{ field: 'x', issue: 'bắt buộc' }]);
+      }),
+    ).post('/t');
+    expect(res.status).toBe(400);
+    expect(res.body.error).toMatchObject({ code: 'VALIDATION_ERROR', message: 'Sai dữ liệu', details: [{ field: 'x' }] });
+  });
+
+  it('JSON hỏng → 400 "JSON không hợp lệ"', async () => {
+    const res = await request(failing((_req, res) => void res.json({})))
+      .post('/t')
+      .set('Content-Type', 'application/json')
+      .send('{hong');
+    expect(res.status).toBe(400);
+    expect(res.body.error.message).toBe('JSON không hợp lệ');
+  });
+
+  it('lỗi bất ngờ trong asyncHandler → 500, ghi log, không lộ chi tiết lỗi', async () => {
+    errors.length = 0;
+    const res = await request(
+      failing(
+        asyncHandler(async () => {
+          throw new Error('mat ket noi DB: password=bi-mat');
+        }),
+      ),
+    ).post('/t');
+    expect(res.status).toBe(500);
+    expect(res.body.error.code).toBe('INTERNAL_ERROR');
+    expect(JSON.stringify(res.body)).not.toContain('bi-mat');
+    expect(errors).toHaveLength(1);
   });
 });
