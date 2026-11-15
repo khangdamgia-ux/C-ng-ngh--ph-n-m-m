@@ -1,7 +1,7 @@
 import express from 'express';
 import request from 'supertest';
 import { afterEach, describe, expect, it } from 'vitest';
-import { finalize, requestId, requireInternalKey } from './http.js';
+import { finalize, requestId, requireInternalKey, requireRole } from './http.js';
 import type { Logger } from './logger.js';
 
 const silent: Logger = { info: () => {}, warn: () => {}, error: () => {} };
@@ -62,5 +62,40 @@ describe('requireInternalKey', () => {
     delete process.env.INTERNAL_API_KEY;
     const res = await request(appWith(requireInternalKey)).get('/t').set('X-Internal-Key', '');
     expect(res.status).toBe(401);
+  });
+});
+
+describe('requireRole', () => {
+  it('gắn req.user khi vai trò hợp lệ', async () => {
+    const res = await request(appWith(requireRole('SUPER_ADMIN', 'EDITOR')))
+      .get('/t')
+      .set('X-User-Id', '7')
+      .set('X-User-Role', 'EDITOR');
+    expect(res.status).toBe(200);
+    expect(res.body.user).toEqual({ id: 7, role: 'EDITOR' });
+  });
+
+  it('trả 401 khi thiếu danh tính', async () => {
+    const res = await request(appWith(requireRole('SUPER_ADMIN'))).get('/t');
+    expect(res.status).toBe(401);
+  });
+
+  it('trả 401 khi X-User-Id không phải số', async () => {
+    const res = await request(appWith(requireRole())).get('/t').set('X-User-Id', 'abc').set('X-User-Role', 'EDITOR');
+    expect(res.status).toBe(401);
+  });
+
+  it('trả 403 khi EDITOR gọi API chỉ dành cho SUPER_ADMIN', async () => {
+    const res = await request(appWith(requireRole('SUPER_ADMIN')))
+      .get('/t')
+      .set('X-User-Id', '7')
+      .set('X-User-Role', 'EDITOR');
+    expect(res.status).toBe(403);
+    expect(res.body.error.code).toBe('FORBIDDEN');
+  });
+
+  it('không giới hạn vai trò khi không truyền vai trò nào', async () => {
+    const res = await request(appWith(requireRole())).get('/t').set('X-User-Id', '1').set('X-User-Role', 'EDITOR');
+    expect(res.status).toBe(200);
   });
 });
