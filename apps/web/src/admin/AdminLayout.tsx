@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import { Navigate, NavLink, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from './auth';
 import { Icon, type IconName } from './icons';
@@ -56,7 +57,10 @@ export function AdminLayout() {
         </div>
       </aside>
       <section className="content">
-        <Outlet />
+        {/* Giữ thanh bên khi trang con đang tải (trang con được tải theo nhu cầu). */}
+        <Suspense fallback={<p role="status">Đang tải…</p>}>
+          <Outlet />
+        </Suspense>
       </section>
     </div>
   );
