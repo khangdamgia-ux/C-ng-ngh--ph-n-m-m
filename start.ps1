@@ -1,11 +1,10 @@
 # Khoi dong toan bo Hoi An Audio Guide + tunnel HTTPS + ma QR.
-# May moi: tu khoi phuc du lieu tu backup\ neu chua co du lieu.
+# May moi: docker compose tu khoi phuc du lieu tu db\backup\HoiAnGuideDb.bak (xem backup.bat).
 $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent $MyInvocation.MyCommand.Path
 Set-Location $root
 $P = 'hoian-audio-guide'                       # co dinh ten project => ten volume luon giong nhau o moi may
 $dc = @('compose', '-p', $P)
-$rootFwd = $root -replace '\\', '/'
 
 function Step($m) { Write-Host "`n==> $m" -ForegroundColor Cyan }
 function Fail($m) { Write-Host "`nLOI: $m" -ForegroundColor Red; Read-Host 'Nhan Enter de dong'; exit 1 }
@@ -16,40 +15,21 @@ if ($LASTEXITCODE -ne 0) { Fail 'Docker Desktop chua chay. Hay mo Docker Desktop
 
 Step 'Kiem tra file .env'
 if (-not (Test-Path .env)) {
-  if (Test-Path .env.example) { Copy-Item .env.example .env; Write-Host 'Da tao .env tu .env.example. Hay sua mat khau roi chay lai.' -ForegroundColor Yellow; notepad .env; Fail 'Sua xong .env thi chay lai start.bat.' }
-  Fail 'Thieu file .env (hay chep .env tu may cu vao thu muc nay).'
+  Write-Host 'Khong co .env -> dung gia tri mac dinh trong docker-compose.yml (du de chay thu).' -ForegroundColor Yellow
 }
 
-Step 'Kiem tra du lieu'
-docker volume inspect "${P}_mssql-data" *> $null
-$firstRun = ($LASTEXITCODE -ne 0)
-$restored = $false
-if ($firstRun) {
-  Write-Host 'May nay chua co du lieu.'
-  if (Test-Path backup\mssql-data.tgz) {
-    Step 'Khoi phuc du lieu tu backup\'
-    docker @dc create --build
-    if ($LASTEXITCODE -ne 0) { Fail 'docker compose create loi.' }
-    docker run --rm -v "${P}_mssql-data:/v" -v "${rootFwd}/backup:/b" alpine tar xzf /b/mssql-data.tgz -C /v
-    if ($LASTEXITCODE -ne 0) { Fail 'Khoi phuc database loi.' }
-    if (Test-Path backup\media.tgz) {
-      docker run --rm -v "${P}_media:/v" -v "${rootFwd}/backup:/b" alpine tar xzf /b/media.tgz -C /v
-    }
-    $restored = $true
-  } else {
-    Write-Host 'Khong co backup\mssql-data.tgz: se tao du lieu mau moi.' -ForegroundColor Yellow
-  }
-} else {
-  Write-Host 'Da co du lieu, giu nguyen.'
-}
+Step 'Bat he thong (lan dau build + khoi phuc du lieu tu db\backup\ co the mat vai phut)'
+# Service "migrate" tu khoi phuc db\backup\<DB>.bak neu may nay chua co database, roi moi bat cac service khac.
+docker @dc up -d --build
+if ($LASTEXITCODE -ne 0) { Fail 'Khong bat duoc he thong. Xem: docker compose -p hoian-audio-guide logs migrate sqlserver --tail 80' }
+docker @dc logs migrate --tail 20
 
-Step 'Bat he thong (lan dau build co the mat vai phut)'
-docker @dc up -d --build --wait
-if ($LASTEXITCODE -ne 0) { Fail 'Khong bat duoc he thong. Xem: docker compose -p hoian-audio-guide logs --tail 50' }
-if ($firstRun -and -not $restored) {
-  Step 'Tao bang + du lieu mau'
-  docker @dc --profile tools run --rm migrate
+Step 'Cho API Gateway san sang'
+$ok = $false
+for ($i = 0; $i -lt 90 -and -not $ok; $i++) {
+  try { Invoke-WebRequest -UseBasicParsing -TimeoutSec 3 http://localhost:8080/health | Out-Null; $ok = $true } catch { Start-Sleep 2 }
 }
+if (-not $ok) { Fail 'Gateway chua san sang. Xem: docker compose -p hoian-audio-guide logs --tail 50' }
 
 Step 'Mo tunnel HTTPS (cloudflared)'
 $cf = (Get-Command cloudflared -ErrorAction SilentlyContinue).Source

@@ -6,3 +6,5 @@ apps/web/dev-dist
 media
 media-test
 .git
+backup
+db/backup

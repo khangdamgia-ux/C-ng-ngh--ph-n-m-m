@@ -1,0 +1,94 @@
+name: CI
+on:
+  pull_request:
+    branches: [develop, main]
+  push:
+    branches: [develop, main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    name: Lint · Type check · Unit test · Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
+
+  integration:
+    name: Integration test (SQL Server)
+    needs: quality
+    runs-on: ubuntu-latest
+    services:
+      mssql:
+        image: mcr.microsoft.com/mssql/server:2022-latest
+        env:
+          ACCEPT_EULA: "Y"
+          MSSQL_SA_PASSWORD: ${{ secrets.CI_SA_PASSWORD || 'Ci_Passw0rd!2026' }}
+        ports: ["1433:1433"]
+        options: >-
+          --health-cmd "/opt/mssql-tools18/bin/sqlcmd -C -S localhost -U sa -P \"$MSSQL_SA_PASSWORD\" -Q 'SELECT 1'"
+          --health-interval 10s --health-timeout 5s --health-retries 12
+    env:
+      DB_HOST: localhost
+      DB_USER: sa
+      DB_PASSWORD: ${{ secrets.CI_SA_PASSWORD || 'Ci_Passw0rd!2026' }}
+      INTERNAL_API_KEY: ci-internal-key
+      JWT_SECRET: ci-jwt-secret-0123456789abcdef0123
+      SEED_ADMIN_USERNAME: admin
+      SEED_ADMIN_PASSWORD: Admin@12345
+      MEDIA_DIR: ./media-test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - run: npm ci
+      - run: npm run db:seed
+      - run: npm run test:integration
+
+  docker:
+    name: Build Docker images
+    needs: quality
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        app: [gateway, auth, location, content, analytics]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: docker/service.Dockerfile
+          build-args: SERVICE=${{ matrix.app }}
+          push: false
+
+  e2e:
+    name: E2E – thuyết minh rảnh tay (Docker Compose + Playwright)
+    needs: integration
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - name: Tạo .env cho CI
+        run: |
+          cp .env.example .env
+          sed -i "s|^DB_PASSWORD=.*|DB_PASSWORD=Ci_Passw0rd!2026|; s|^JWT_SECRET=.*|JWT_SECRET=ci-jwt-secret-0123456789abcdef0123|; s|^INTERNAL_API_KEY=.*|INTERNAL_API_KEY=ci-internal-key|; s|^SEED_ADMIN_PASSWORD=.*|SEED_ADMIN_PASSWORD=Admin@12345|; s|^CORS_ORIGIN=.*|CORS_ORIGIN=http://localhost|; s|^PUBLIC_WEB_URL=.*|PUBLIC_WEB_URL=http://localhost|" .env
+          echo "RESTORE_DIR=" >> .env   # CI test trên dữ liệu mẫu, không khôi phục db/backup/*.bak
+      - run: docker compose up -d --build   # migrate tự chạy trước các service
+      - name: Chờ API Gateway
+        run: for i in $(seq 1 60); do curl -fsS http://localhost:8080/health && exit 0; sleep 3; done; docker compose logs --tail 100; exit 1
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: BASE_URL=http://localhost npm run test:e2e
+      - if: failure()
+        run: docker compose logs --tail 200

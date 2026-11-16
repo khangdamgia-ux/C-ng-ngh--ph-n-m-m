@@ -12,6 +12,28 @@ Code hiện thực theo tài liệu `PRD_HoiAn_AudioGuide_v2.3` (Node.js + TypeS
 
 Giải nén → bấm đúp **`CHAY-TAT-CA.bat`**. File này tự: mở Docker Desktop nếu chưa chạy, tải ảnh địa điểm còn thiếu (`tai-anh-dia-diem.bat`), rồi build + khởi động toàn bộ hệ thống và mở tunnel HTTPS (`start.bat`). Giữ cửa sổ mở trong lúc dùng.
 
+### Dữ liệu đi kèm repo (clone về là có đúng dữ liệu)
+
+Toàn bộ dữ liệu (database + file âm thanh đã tải lên) được lưu trong `db/backup/`:
+
+| File | Nội dung |
+|---|---|
+| `db/backup/HoiAnGuideDb.bak` | Bản sao lưu SQL Server (`BACKUP DATABASE`) – di tích, bài thuyết minh, ngôn ngữ, tài khoản admin, thống kê |
+| `db/backup/media/` | File âm thanh/ảnh đã tải lên qua trang Admin (nếu có) |
+
+**Người tải về** chỉ cần Docker Desktop:
+
+```bash
+git clone <repo> && cd <repo>
+docker compose up -d --build        # lần đầu: tự khôi phục db/backup/HoiAnGuideDb.bak rồi mới bật các service
+```
+
+Không cần file `.env` (thiếu thì dùng giá trị mặc định trong `docker-compose.yml`). Đăng nhập Admin bằng **tài khoản và mật khẩu admin đang có trong dữ liệu**, không phải `SEED_ADMIN_PASSWORD`.
+Nếu máy đó đã từng chạy dự án (đã có volume cũ) mà muốn lấy lại dữ liệu từ repo: `docker compose down -v` rồi `docker compose up -d --build`.
+
+**Chủ dự án – trước mỗi lần push**, xuất dữ liệu mới nhất: bấm đúp `backup.bat` (Windows) hoặc `./backup.sh` (Linux/macOS), rồi
+`git add db/backup && git commit -m "Cập nhật dữ liệu" && git push`.
+
 ## 1. Kiến trúc
 
 ```
@@ -57,9 +79,8 @@ docker/, docker-compose.yml, .github/workflows/ci.yml, cd.yml
 Yêu cầu: Docker Desktop.
 
 ```bash
-cp .env.example .env          # rồi sửa DB_PASSWORD, JWT_SECRET, INTERNAL_API_KEY, SEED_ADMIN_PASSWORD
-docker compose up -d --build --wait
-docker compose --profile tools run --rm migrate   # tạo bảng + nạp 15 di tích × 6 ngôn ngữ + tài khoản admin
+cp .env.example .env          # (tùy chọn) sửa DB_PASSWORD, JWT_SECRET, INTERNAL_API_KEY, SEED_ADMIN_PASSWORD
+docker compose up -d --build  # service migrate tự chạy: khôi phục db/backup/*.bak, hoặc tạo bảng + dữ liệu mẫu nếu không có .bak
 ```
 
 - Website: <http://localhost>
