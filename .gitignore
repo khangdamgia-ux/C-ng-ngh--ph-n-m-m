@@ -1,0 +1,11 @@
+node_modules/
+dist/
+dev-dist/
+.env
+media/
+coverage/
+*.log
+db/seed/V100__seed_hoian.sql
+
+# Ban sao luu dang tar tho cu (khong dung nua; du lieu nam o db/backup/)
+/backup/

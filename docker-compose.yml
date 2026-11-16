@@ -1,0 +1,124 @@
+# Chạy toàn bộ hệ thống (máy nào cũng vậy): docker compose up -d --build
+#  - Lần đầu: service "migrate" tự KHÔI PHỤC dữ liệu từ db/backup/HoiAnGuideDb.bak (nếu có),
+#    nếu không có file .bak thì tạo bảng + dữ liệu mẫu.
+#  - Không bắt buộc có file .env: thiếu biến nào thì dùng giá trị mặc định bên dưới.
+#  - Cập nhật file .bak từ dữ liệu đang chạy: backup.bat (Windows) hoặc ./backup.sh (Linux/macOS).
+name: hoian-audio-guide            # cố định tên project => tên volume giống nhau ở mọi máy
+
+x-env: &common-env
+  DB_HOST: sqlserver
+  DB_PORT: ${DB_PORT:-1433}
+  DB_NAME: ${DB_NAME:-HoiAnGuideDb}
+  DB_USER: ${DB_USER:-sa}
+  DB_PASSWORD: ${DB_PASSWORD:-HoiAn@Docker2025}
+  JWT_SECRET: ${JWT_SECRET:-doi-chuoi-nay-trong-file-env-it-nhat-32-ky-tu}
+  JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-60m}
+  INTERNAL_API_KEY: ${INTERNAL_API_KEY:-hoian-internal-key-doi-trong-env}
+  CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:5173}
+  PUBLIC_WEB_URL: ${PUBLIC_WEB_URL:-http://localhost:5173}
+  SEED_ADMIN_USERNAME: ${SEED_ADMIN_USERNAME:-admin}
+  SEED_ADMIN_PASSWORD: ${SEED_ADMIN_PASSWORD:-Admin@123456}
+
+x-service: &service
+  env_file: [{ path: .env, required: false }]
+  restart: unless-stopped
+  environment: &svc-env
+    <<: *common-env
+    AUTH_SERVICE_URL: http://auth:4001
+    LOCATION_SERVICE_URL: http://location:4002
+    CONTENT_SERVICE_URL: http://content:4003
+    ANALYTICS_SERVICE_URL: http://analytics:4004
+  depends_on:
+    sqlserver: { condition: service_healthy }
+    migrate: { condition: service_completed_successfully }
+
+services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    ports:
+      - "1433:1433"
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: ${DB_PASSWORD:-HoiAn@Docker2025}
+    volumes:
+      - mssql-data:/var/opt/mssql
+      - ./db/backup:/var/opt/mssql/backup:ro   # SQL Server đọc file .bak ở đây khi khôi phục
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -C -S localhost -U sa -P \"$$MSSQL_SA_PASSWORD\" -Q 'SELECT 1' || exit 1"]
+      interval: 10s
+      retries: 12
+      start_period: 20s
+    restart: unless-stopped
+
+  # Chạy 1 lần rồi thoát mỗi khi "up": khôi phục .bak (nếu DB chưa có) → migration → seed (bỏ qua phần đã chạy)
+  migrate:
+    image: ${IMAGE_PREFIX:-hoian}/migrate:${IMAGE_TAG:-latest}
+    build: { context: ., dockerfile: docker/migrate.Dockerfile }
+    env_file: [{ path: .env, required: false }]
+    environment:
+      <<: *common-env
+      RESTORE_DIR: ${RESTORE_DIR-/backup}           # thư mục .bak nhìn từ container migrate (đặt rỗng = không khôi phục)
+      RESTORE_DIR_SQL: /var/opt/mssql/backup       # cùng thư mục đó nhìn từ container sqlserver
+      MEDIA_DIR: /data/media
+    volumes:
+      - ./db/backup:/backup:ro
+      - media:/data/media
+    user: root                                     # để chép file âm thanh vào volume media
+    depends_on: { sqlserver: { condition: service_healthy } }
+    restart: "no"
+
+  auth:
+    <<: *service
+    image: ${IMAGE_PREFIX:-hoian}/auth:${IMAGE_TAG:-latest}
+    build: { context: ., dockerfile: docker/service.Dockerfile, args: { SERVICE: auth } }
+    environment: { <<: *svc-env, PORT: "4001" }
+    healthcheck: { test: ["CMD", "wget", "-qO-", "http://localhost:4001/health"], interval: 15s, retries: 5 }
+
+  location:
+    <<: *service
+    image: ${IMAGE_PREFIX:-hoian}/location:${IMAGE_TAG:-latest}
+    build: { context: ., dockerfile: docker/service.Dockerfile, args: { SERVICE: location } }
+    environment: { <<: *svc-env, PORT: "4002" }
+    healthcheck: { test: ["CMD", "wget", "-qO-", "http://localhost:4002/health"], interval: 15s, retries: 5 }
+
+  content:
+    <<: *service
+    image: ${IMAGE_PREFIX:-hoian}/content:${IMAGE_TAG:-latest}
+    build: { context: ., dockerfile: docker/service.Dockerfile, args: { SERVICE: content } }
+    environment: { <<: *svc-env, PORT: "4003", MEDIA_DIR: /data/media }
+    volumes: ["media:/data/media"]
+    user: root
+    healthcheck: { test: ["CMD", "wget", "-qO-", "http://localhost:4003/health"], interval: 15s, retries: 5 }
+
+  analytics:
+    <<: *service
+    image: ${IMAGE_PREFIX:-hoian}/analytics:${IMAGE_TAG:-latest}
+    build: { context: ., dockerfile: docker/service.Dockerfile, args: { SERVICE: analytics } }
+    environment: { <<: *svc-env, PORT: "4004" }
+    healthcheck: { test: ["CMD", "wget", "-qO-", "http://localhost:4004/health"], interval: 15s, retries: 5 }
+
+  gateway:
+    <<: *service
+    image: ${IMAGE_PREFIX:-hoian}/gateway:${IMAGE_TAG:-latest}
+    build: { context: ., dockerfile: docker/service.Dockerfile, args: { SERVICE: gateway } }
+    environment: { <<: *svc-env, GATEWAY_PORT: "8080" }
+    depends_on:
+      auth: { condition: service_healthy }
+      location: { condition: service_healthy }
+      content: { condition: service_healthy }
+      analytics: { condition: service_healthy }
+    healthcheck: { test: ["CMD", "wget", "-qO-", "http://localhost:8080/health"], interval: 15s, retries: 5 }
+    ports: ["8080:8080"]
+
+  web:
+    dns: [8.8.8.8, 1.1.1.1]   # không phụ thuộc DNS của máy chủ khi tải ảnh bản đồ
+    image: ${IMAGE_PREFIX:-hoian}/web:${IMAGE_TAG:-latest}
+    build: { context: ., dockerfile: docker/web.Dockerfile }
+    depends_on:
+      gateway: { condition: service_healthy }
+    ports: ["80:80"]
+    restart: unless-stopped
+
+volumes:
+  mssql-data:
+  media:
