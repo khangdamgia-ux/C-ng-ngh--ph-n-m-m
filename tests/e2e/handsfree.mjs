@@ -19,6 +19,7 @@ const browser = await chromium.launch(process.env.CHROMIUM_PATH ? { executablePa
 const ctx = await browser.newContext({ viewport: { width: 1280, height: 860 }, locale: 'vi-VN', permissions: ['geolocation'], geolocation: { latitude: 15.877, longitude: 108.3252, accuracy: 5 } });
 // Giọng đọc giả: ghi lại câu đã đọc, mỗi câu “đọc” trong 30 ms
 await ctx.addInitScript(() => {
+  localStorage.setItem('hoian.nearbyRadius', '50');
   window.__spoken = [];
   Object.defineProperty(window, 'speechSynthesis', {
     value: { getVoices: () => [], cancel() {}, pause() {}, resume() {}, speak(u) { window.__spoken.push({ lang: u.lang, text: u.text }); setTimeout(() => u.onend?.(), 30); } },
